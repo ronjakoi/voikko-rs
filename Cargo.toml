@@ -1,8 +1,11 @@
 [package]
 name = "voikko-rs"
 version = "0.0.1"
-authors = ["Ronja Koistinen <ronja.koistinen@helsinki.fi>"]
+authors = ["Ronja Koistinen <ronja.koistinen@kapsi.fi>"]
 edition = "2018"
+publish = false
+license = "GPL-3.0-or-later"
+repository = "https://github.com/ronjakoi/voikko-rs"
 
 [dependencies]
 libc = "0.2"

@@ -14,7 +14,15 @@ mod voikko {
     }
 
     impl Voikko {
-        pub fn new(language: &str, path: Option<&str>) -> Result<Self, String> {
+        /// Initializes Voikko and returns a Voikko struct.
+        ///
+        /// # Arguments
+        /// * `language` - BCP 47 language tag for the language to be used.
+        ///                Private use subtags can be used to specify the dictionary variant.
+        /// * `path` - Path to a directory from which dictionary files should be searched first before
+        ///            looking into the standard dictionary locations. If `None`, no additional search path
+        ///            will be used.
+        pub fn new(language: &str, path: Option<&str>) -> Result<Voikko, String> {
             let v = libvoikko::init(language, path);
 
             match v {

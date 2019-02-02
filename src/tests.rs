@@ -5,8 +5,7 @@ mod tests {
 
     #[test]
     fn test_init() {
-        let V = voikko::Voikko::new("fi-x-morphoid", Some("/etc/voikko")).unwrap();
-        //libvoikko::init_test();
+        let V = voikko::Voikko::new("fi-x-morphoid", None).unwrap();
     }
 
     #[test]

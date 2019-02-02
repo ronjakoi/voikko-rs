@@ -110,8 +110,7 @@ extern "C" {
     fn voikko_free_mor_analysis_value_cstr(analysis_value: *mut c_char);
 }
 
-pub fn init(language: &str, path: Option<&str>)
-        -> Result<*mut VoikkoHandle, String> {
+pub fn init(language: &str, path: Option<&str>) -> Result<*mut VoikkoHandle, String> {
     let path_ptr = match path {
         Some(x) => ffi::CString::new(x).expect("CString::new failed").as_ptr(),
         None    => std::ptr::null() as *const c_char
@@ -120,7 +119,9 @@ pub fn init(language: &str, path: Option<&str>)
     let error;
     unsafe {
         let error_ptr = ffi::CString::new("").unwrap().as_ptr() as *const *const c_char;
-        let lang_ptr = ffi::CString::new(language).unwrap().as_ptr() as *const c_char;
+        let lang = ffi::CString::new(language).unwrap();
+        let lang_ptr = lang.as_ptr() as *const c_char;
+        println!("language is \"{}\"", lang.to_str().unwrap());
         handle_ptr = voikkoInit(error_ptr, lang_ptr, path_ptr);
         error = ffi::CStr::from_ptr(*error_ptr).to_str().unwrap_or_default().to_string();
     }

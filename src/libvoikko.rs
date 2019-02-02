@@ -75,7 +75,7 @@ extern "C" {
     fn voikkoGetGrammarErrorShortDescription(error: *mut VoikkoGrammarError,
                                              language: *const c_char) -> *mut c_char;
 
-    fn voikkoFreeErrorMessageCster(message: *mut c_char);
+    fn voikkoFreeErrorMessageCstr(message: *mut c_char);
 
     fn voikko_list_dicts(path: *const c_char) -> *mut *mut voikko_dict;
 

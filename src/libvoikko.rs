@@ -116,17 +116,17 @@ pub fn init(language: &str, path: Option<&str>) -> Result<*mut VoikkoHandle, Str
         None    => std::ptr::null() as *const c_char
     };
     let handle_ptr;
-    let error;
+    let error_ptr = ffi::CString::new("").unwrap().as_ptr() as *const *const c_char;
     unsafe {
-        let error_ptr = ffi::CString::new("").unwrap().as_ptr() as *const *const c_char;
         let lang = ffi::CString::new(language).unwrap();
         let lang_ptr = lang.as_ptr() as *const c_char;
-        println!("language is \"{}\"", lang.to_str().unwrap());
         handle_ptr = voikkoInit(error_ptr, lang_ptr, path_ptr);
-        error = ffi::CStr::from_ptr(*error_ptr).to_str().unwrap_or_default().to_string();
     }
 
     if handle_ptr.is_null() {
+        let error = unsafe {
+            ffi::CStr::from_ptr(*error_ptr).to_str().unwrap_or_default().to_string()
+        };
         Err(error)
     } else {
         Ok(handle_ptr)
@@ -135,9 +135,7 @@ pub fn init(language: &str, path: Option<&str>) -> Result<*mut VoikkoHandle, Str
 
 pub fn terminate(handle: *mut VoikkoHandle) {
     unsafe {
-        println!("{:?}", handle);
         voikkoTerminate(handle);
-        println!("called voikkoTerminate()");
     }
 }
 

@@ -14,7 +14,7 @@ mod voikko {
     }
 
     impl Voikko {
-        /// Initializes Voikko and returns a Voikko struct.
+        /// Initializes Voikko and returns a Voikko struct or an error string.
         ///
         /// # Arguments
         /// * `language` - BCP 47 language tag for the language to be used.
@@ -34,7 +34,6 @@ mod voikko {
 
     impl Drop for Voikko {
         fn drop(&mut self) {
-            println!("going to drop Voikko");
             libvoikko::terminate(self.handle);
         }
     }

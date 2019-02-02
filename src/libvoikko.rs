@@ -110,38 +110,33 @@ extern "C" {
     fn voikko_free_mor_analysis_value_cstr(analysis_value: *mut c_char);
 }
 
-pub fn init(language: &str, path: Option<String>)
-        -> Result<VoikkoHandle, String> {
+pub fn init(language: &str, path: Option<&str>)
+        -> Result<*mut VoikkoHandle, String> {
     let path_ptr = match path {
         Some(x) => ffi::CString::new(x).expect("CString::new failed").as_ptr(),
-        None    => std::ptr::null()
+        None    => std::ptr::null() as *const c_char
     };
-    let handle;
     let handle_ptr;
     let error;
     unsafe {
-        #[derive(Debug)]
-        let error_ptr = std::ptr::null_mut() as *const *const c_char;
-        let lang = ffi::CString::new(language)
-                   .expect("CString::new failed");
-        let lang_ptr = lang.as_ptr();
+        let error_ptr = ffi::CString::new("").unwrap().as_ptr() as *const *const c_char;
+        let lang_ptr = ffi::CString::new(language).unwrap().as_ptr() as *const c_char;
         handle_ptr = voikkoInit(error_ptr, lang_ptr, path_ptr);
         error = ffi::CStr::from_ptr(*error_ptr).to_str().unwrap_or_default().to_string();
     }
 
     if handle_ptr.is_null() {
-        unsafe {
-            handle = std::ptr::read(handle_ptr);
-        }
-        Ok(handle)
-    } else {
         Err(error)
+    } else {
+        Ok(handle_ptr)
     }
 }
 
-pub fn terminate(handle: &mut VoikkoHandle) {
+pub fn terminate(handle: *mut VoikkoHandle) {
     unsafe {
-        voikkoTerminate(handle as *mut VoikkoHandle);
+        println!("{:?}", handle);
+        voikkoTerminate(handle);
+        println!("called voikkoTerminate()");
     }
 }
 

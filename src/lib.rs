@@ -10,11 +10,11 @@ mod voikko {
     }
 
     pub struct Voikko {
-        handle: libvoikko::VoikkoHandle,
+        handle: *mut libvoikko::VoikkoHandle,
     }
 
     impl Voikko {
-        pub fn new(language: &str, path: Option<String>) -> Result<Self, String> {
+        pub fn new(language: &str, path: Option<&str>) -> Result<Self, String> {
             let v = libvoikko::init(language, path);
 
             match v {
@@ -26,7 +26,8 @@ mod voikko {
 
     impl Drop for Voikko {
         fn drop(&mut self) {
-            libvoikko::terminate(&mut self.handle);
+            println!("going to drop Voikko");
+            libvoikko::terminate(self.handle);
         }
     }
 }

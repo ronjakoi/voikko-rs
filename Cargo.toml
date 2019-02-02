@@ -1,0 +1,8 @@
+[package]
+name = "libvoikko-rust"
+version = "0.1.0"
+authors = ["Ronja Koistinen <ronja.koistinen@helsinki.fi>"]
+edition = "2018"
+
+[dependencies]
+libc = "0.2"

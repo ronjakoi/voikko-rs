@@ -23,6 +23,7 @@ mod voikko {
 
     use super::*;
 
+    /// Returns the version number of libvoikko.
     pub fn version() -> String {
         libvoikko::version()
     }
@@ -40,14 +41,19 @@ mod voikko {
     }
 
     impl Voikko {
-        /// Initializes Voikko and returns a Voikko struct or an error string.
+        /// Initializes Voikko and returns a Voikko struct.
         ///
         /// # Arguments
+        ///
         /// * `language` - BCP 47 language tag for the language to be used.
         ///                Private use subtags can be used to specify the dictionary variant.
         /// * `path` - Path to a directory from which dictionary files should be searched first before
         ///            looking into the standard dictionary locations. If `None`, no additional search path
         ///            will be used.
+        ///
+        /// # Errors
+        ///
+        /// Returns an error string if init fails.
         pub fn new(language: &str, path: Option<&str>) -> Result<Voikko, String> {
             let v = libvoikko::init(language, path);
 

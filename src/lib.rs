@@ -22,6 +22,7 @@ mod libvoikko;
 mod voikko {
 
     use super::*;
+    use unicode_segmentation::UnicodeSegmentation;
 
     /// Returns the version number of libvoikko.
     pub fn version() -> String {
@@ -88,6 +89,50 @@ mod voikko {
             libvoikko::suggest(self.handle, word)
         }
 
+        /// Hyphenates the given word in UTF-8 encoding.
+        /// Returns a string containing the hyphenation using the following notation:
+        ///     ' ' = no hyphenation at this character,
+        ///     '-' = hyphenation point (character at this position
+        ///           is preserved in the hyphenated form),
+        ///     '=' = hyphenation point (character at this position
+        ///           is replaced by the hyphen.)
+        ///
+        /// # Arguments
+        ///
+        /// * `word` - word to hyphenate
+        ///
+        /// # Errors
+        ///
+        /// Returns an error string on error.
+        pub fn hyphenate(&self, word: &str) -> Result<String, bool> {
+            libvoikko::hyphenate(self.handle, word)
+        }
+
+        /// Hyphenates the given word in UTF-8 encoding.
+        /// Returns a string where hyphens are inserted in all hyphenation points.
+        ///
+        /// # Arguments
+        ///
+        /// * `word` - word to hyphenate
+        /// * `hyphen` - string to insert at hyphenation points
+        pub fn insert_hyphens(&self, word: &str, hyphen: &str) -> Result<String, bool> {
+            let hyphens = self.hyphenate(word);
+            match hyphens {
+                Err(_) => Err(false),
+                Ok(hyph) => {
+                    Ok(word.graphemes(true)
+                       .zip(hyph.graphemes(true))
+                       .map(|(w, h)| match h {
+                           " " => String::from(w),
+                           "-" => format!("{}{}", hyphen, w),
+                           "=" => String::from(hyphen),
+                           _   => String::from(w),
+                       })
+                       .collect::<String>()
+                      )
+                }
+            }
+        }
     }
 
     impl Drop for Voikko {

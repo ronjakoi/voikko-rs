@@ -62,10 +62,10 @@ extern "C" {
 
     fn voikkoSuggestCstr(handle: *mut VoikkoHandle, word: *const c_char) -> *mut *mut c_char;
 
-    fn voikkoHyphenateCstr(handle: *mut VoikkoHandle, word: *const c_char) -> *mut *mut c_char;
+    fn voikkoHyphenateCstr(handle: *mut VoikkoHandle, word: *const c_char) -> *mut c_char;
 
-    fn voikkoInsertHyphensCstr(handle: *mut VoikkoHandle, word: *const c_char, hyphern: *const c_char,
-                               allowContextChanges: c_int) -> *mut c_char;
+    //fn voikkoInsertHyphensCstr(handle: *mut VoikkoHandle, word: *const c_char, hyphen: *const c_char,
+    //                           allowContextChanges: c_int) -> *mut c_char;
 
     fn voikkoFreeCstrArray(cstrArray: *mut *mut c_char);
 
@@ -194,3 +194,40 @@ pub fn suggest(handle: *mut VoikkoHandle, word: &str) -> Vec<String> {
         return vector;
     }
 }
+
+pub fn hyphenate(handle: *mut VoikkoHandle, word: &str) -> Result<String, bool> {
+    let ptr = unsafe {
+        voikkoHyphenateCstr(handle, ffi::CString::new(word).unwrap().as_ptr())
+    };
+    if ptr.is_null() {
+        Err(false)
+    } else {
+        let cstr = unsafe { ffi::CStr::from_ptr(ptr).to_str().unwrap() };
+        let ret = cstr.to_string();
+        unsafe {
+            voikkoFreeCstr(ptr);
+        }
+        Ok(ret)
+    }
+}
+
+/* This function uses functionality from the libvoikko 4.2.0 API, but
+ * as Ubuntu 18.04 only has 4.1.1, I have not tested it. */
+/*pub fn insert_hyphens(handle: *mut VoikkoHandle, word: &str, hyphen: &str, allow_context_changes: bool) -> Result<String, bool> {
+    let ptr = unsafe {
+        voikkoInsertHyphensCstr(handle,
+                                ffi::CString::new(word).unwrap().as_ptr(),
+                                ffi::CString::new(hyphen).unwrap().as_ptr(),
+                                allow_context_changes as c_int)
+    };
+    if ptr.is_null() {
+        Err(false)
+    } else {
+        let cstr = unsafe { ffi::CStr::from_ptr(ptr).to_str().unwrap() };
+        let ret = cstr.to_string();
+        unsafe {
+            voikkoFreeCstr(ptr);
+        }
+        Ok(ret)
+    }
+}*/

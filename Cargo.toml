@@ -9,3 +9,4 @@ repository = "https://github.com/ronjakoi/voikko-rs"
 
 [dependencies]
 libc = "0.2"
+unicode-segmentation = "1.2"

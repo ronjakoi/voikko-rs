@@ -39,4 +39,11 @@ mod tests {
         assert_eq!(test0, SpellReturn::SpellOk);
         assert_eq!(test1, SpellReturn::SpellFailed);
     }
+
+    #[test]
+    fn test_suggest() {
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let sug = v.suggest("kisse");
+        assert_eq!(sug, vec!["kissa", "kusse", "Kessi"]);
+    }
 }

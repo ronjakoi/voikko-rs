@@ -172,3 +172,25 @@ pub fn spell(handle: *mut VoikkoHandle, word: &str) -> isize {
     };
     res as isize
 }
+
+pub fn suggest(handle: *mut VoikkoHandle, word: &str) -> Vec<String> {
+    let ptr = unsafe {
+        voikkoSuggestCstr(handle, ffi::CString::new(word).unwrap().as_ptr())
+    };
+    let mut vector = Vec::new();
+    if ptr.is_null() {
+        return vector;
+    } else {
+        unsafe {
+            let mut i = 0;
+            while !(*ptr.offset(i)).is_null() {
+                let sug_str = ffi::CStr::from_ptr(*ptr.offset(i)).to_str().unwrap();
+                vector.push(String::from(sug_str));
+                i += 1;
+            }
+
+            voikkoFreeCstrArray(ptr);
+        }
+        return vector;
+    }
+}

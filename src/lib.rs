@@ -71,6 +71,17 @@ mod voikko {
                 _ => SpellReturn::InternalError,
             }
         }
+
+        /// Finds suggested correct spellings for given UTF-8 encoded word.
+        /// Returns a vector of strings - an empty vector, if no suggestions.
+        ///
+        /// # Arguments
+        ///
+        /// * `word` - word to find suggestions for
+        pub fn suggest(&self, word: &str) -> Vec<String> {
+            libvoikko::suggest(self.handle, word)
+        }
+
     }
 
     impl Drop for Voikko {

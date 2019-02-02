@@ -1,5 +1,5 @@
 [package]
-name = "libvoikko-rust"
+name = "voikko-rs"
 version = "0.1.0"
 authors = ["Ronja Koistinen <ronja.koistinen@helsinki.fi>"]
 edition = "2018"

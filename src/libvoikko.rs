@@ -165,3 +165,10 @@ pub fn version() -> String {
     }
     return ver
 }
+
+pub fn spell(handle: *mut VoikkoHandle, word: &str) -> isize {
+    let res = unsafe {
+        voikkoSpellCstr(handle, ffi::CString::new(word).unwrap().as_ptr())
+    };
+    res as isize
+}

@@ -31,6 +31,14 @@ mod voikko {
         handle: *mut libvoikko::VoikkoHandle,
     }
 
+    #[derive(Debug, PartialEq, Eq)]
+    pub enum SpellReturn {
+        SpellFailed,
+        SpellOk,
+        InternalError,
+        CharsetConversionFailed,
+    }
+
     impl Voikko {
         /// Initializes Voikko and returns a Voikko struct or an error string.
         ///
@@ -46,6 +54,21 @@ mod voikko {
             match v {
                 Ok(handle) => Ok(Voikko { handle: handle }),
                 Err(error) => Err(error),
+            }
+        }
+
+        /// Check the spelling of a UTF-8 character string.
+        ///
+        /// # Arguments
+        ///
+        /// * `word` - word to check
+        pub fn spell(&self, word: &str) -> SpellReturn {
+            let ret = libvoikko::spell(self.handle, word);
+            match ret {
+                0 => SpellReturn::SpellFailed,
+                1 => SpellReturn::SpellOk,
+                3 => SpellReturn::CharsetConversionFailed,
+                _ => SpellReturn::InternalError,
             }
         }
     }

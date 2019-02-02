@@ -18,16 +18,25 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
+    use crate::voikko::*;
 
     #[test]
     fn test_init() {
-        let V = voikko::Voikko::new("fi-x-morphoid", None).unwrap();
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
     }
 
     #[test]
     fn test_version() {
-        let version = voikko::version();
+        let version = version();
         println!("version: {}", version);
+    }
+
+    #[test]
+    fn test_spell() {
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let test0 = v.spell("kuningas");
+        let test1 = v.spell("adfasdf");
+        assert_eq!(test0, SpellReturn::SpellOk);
+        assert_eq!(test1, SpellReturn::SpellFailed);
     }
 }

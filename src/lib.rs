@@ -294,7 +294,7 @@ pub mod voikko {
             let mut sentlist = Vec::new();
             let mut offset = 0;
             let mut next_start_type = SentenceType::NoStart;
-            while offset < text.chars().count() {
+            while offset < text.chars().count() && next_start_type != SentenceType::None {
                 // sent_len is in UTF-8 characters, not bytes
                 let next_text = text
                                 .chars()
@@ -318,9 +318,6 @@ pub mod voikko {
                                           ,
                                           next_start_type);
                 sentlist.push(token);
-                if next_start_type == SentenceType::None {
-                    break;
-                }
                 offset += sent_len;
             }
             sentlist

@@ -116,11 +116,11 @@ mod voikko {
 
         /// Hyphenates the given word in UTF-8 encoding.
         /// Returns a string containing the hyphenation using the following notation:
-        ///     ' ' = no hyphenation at this character,
-        ///     '-' = hyphenation point (character at this position
-        ///           is preserved in the hyphenated form),
-        ///     '=' = hyphenation point (character at this position
-        ///           is replaced by the hyphen.)
+        /// * `' '` = no hyphenation at this character,
+        /// * `'-'` = hyphenation point (character at this position
+        ///        is preserved in the hyphenated form),
+        /// * `'='` = hyphenation point (character at this position
+        ///        is replaced by the hyphen.)
         ///
         /// # Arguments
         ///

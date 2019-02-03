@@ -159,8 +159,7 @@ mod voikko {
             }
         }
 
-
-        /// Tokenize a text string. Returns a vector of strings.
+        /// Tokenize a text string. Returns a vector of Token structs.
         ///
         /// # Arguments
         ///

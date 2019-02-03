@@ -22,13 +22,13 @@ mod tests {
 
     #[test]
     fn test_init() {
-        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let _v = Voikko::new("fi-x-morphoid", None).unwrap();
     }
 
     #[test]
     fn test_version() {
         let version = version();
-        println!("version: {}", version);
+        assert!(version.starts_with("4."));
     }
 
     #[test]
@@ -82,13 +82,36 @@ mod tests {
         let text = "Järvenpää kuuluu Uudenmaan maakuntaan. Sen naapurikunnat ovat Mäntsälä koillisessa, \
                     Sipoo idässä ja Tuusula etelässä, lännessä sekä pohjoisessa.";
         let sentences = v.sentences(text);
-        println!("{:?}", sentences);
         assert!(sentences.len() >= 1); // basic sanity check
     }
 
     #[test]
     fn test_dictionaries() {
-        let dicts = list_dicts("/etc/voikko");
+        let dicts = list_dicts("");
         assert_eq!(dicts[0].language, "fi");
+    }
+
+    #[test]
+    fn test_spelling_languages() {
+        let langs = list_supported_spelling_languages("");
+        assert!(langs
+                .into_iter()
+                .any(|x| x.starts_with("fi")));
+    }
+
+    #[test]
+    fn test_hyphenation_languages() {
+        let langs = list_supported_hyphenation_languages("");
+        assert!(langs
+                .into_iter()
+                .any(|x| x.starts_with("fi")));
+    }
+
+    #[test]
+    fn test_gc_languages() {
+        let langs = list_supported_grammar_checking_languages("");
+        assert!(langs
+                .into_iter()
+                .any(|x| x.starts_with("fi")));
     }
 }

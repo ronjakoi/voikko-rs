@@ -182,23 +182,8 @@ pub fn spell(handle: *mut VoikkoHandle, word: &str) -> isize {
 pub fn suggest(handle: *mut VoikkoHandle, word: &str) -> Vec<String> {
     let ptr = unsafe {
         voikkoSuggestCstr(handle, ffi::CString::new(word).unwrap().as_ptr())
-    };
-    let mut vector = Vec::new();
-    if ptr.is_null() {
-        return vector;
-    } else {
-        unsafe {
-            let mut i = 0;
-            while !(*ptr.offset(i)).is_null() {
-                let sug_str = ffi::CStr::from_ptr(*ptr.offset(i)).to_str().unwrap();
-                vector.push(String::from(sug_str));
-                i += 1;
-            }
-
-            voikkoFreeCstrArray(ptr);
-        }
-        return vector;
-    }
+    } as *mut *mut c_char;
+    get_string_vec(ptr)
 }
 
 pub fn hyphenate(handle: *mut VoikkoHandle, word: &str) -> Result<String, bool> {
@@ -306,4 +291,46 @@ pub fn list_dicts(path: &str) -> Vec<voikko::Dictionary> {
         }
         return vect;
     }
+}
+
+// Get vector of Strings from double pointer to c_char.
+// Also free memory reserved by the pointer.
+fn get_string_vec(ptr: *mut *mut c_char) -> Vec<String> {
+    let mut vect = Vec::new();
+    if ptr.is_null() {
+        return vect;
+    } else {
+        unsafe {
+            let mut i = 0;
+            while !(*ptr.offset(i)).is_null() {
+                vect.push(String::from(ffi::CStr::from_ptr(*ptr.offset(i))
+                                       .to_str()
+                                       .unwrap()));
+                i += 1;
+            }
+            voikkoFreeCstrArray(ptr);
+        }
+        return vect;
+    }
+}
+
+pub fn list_supported_spelling_languages(path: &str) -> Vec<String> {
+    let ptr = unsafe {
+        voikkoListSupportedSpellingLanguages(ffi::CString::new(path).unwrap().as_ptr())
+    } as *mut *mut c_char;
+    get_string_vec(ptr)
+}
+
+pub fn list_supported_hyphenation_languages(path: &str) -> Vec<String> {
+    let ptr = unsafe {
+        voikkoListSupportedHyphenationLanguages(ffi::CString::new(path).unwrap().as_ptr())
+    } as *mut *mut c_char;
+    get_string_vec(ptr)
+}
+
+pub fn list_supported_grammar_checking_languages(path: &str) -> Vec<String> {
+    let ptr = unsafe {
+        voikkoListSupportedGrammarCheckingLanguages(ffi::CString::new(path).unwrap().as_ptr())
+    } as *mut *mut c_char;
+    get_string_vec(ptr)
 }

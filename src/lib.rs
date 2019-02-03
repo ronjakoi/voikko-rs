@@ -62,10 +62,48 @@ pub mod voikko {
     ///
     /// # Arguments
     ///
-    /// * `path` - path to a directory from which dictionary files should be searched
+    /// * `path` - Path to a directory from which dictionary files should be searched
     ///            first before looking into the standard dictionary locations.
+    ///            Pass an empty string in order to only look in standard locations.
     pub fn list_dicts(path: &str) -> Vec<Dictionary> {
         libvoikko::list_dicts(path)
+    }
+
+    /// Return a list of language codes representing the languages for which at least one
+    /// dictionary is available for spell checking. The codes conform to those specified
+    /// in BCP 47. Typically the returned codes consist of only BCP 47 language subtags.
+    /// They may also include tags in format Language-Script, Language-Region, or
+    /// Language-Script-Region if such variants are widely used for a particular language.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to a directory from which dictionary files should be searched
+    ///            first before looking into the standard dictionary locations.
+    ///            Pass an empty string in order to only look in standard locations.
+    pub fn list_supported_spelling_languages(path: &str) -> Vec<String> {
+        libvoikko::list_supported_spelling_languages(path)
+    }
+
+    /// Same as list_supported_spelling_languages() but for hyphenation.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to a directory from which dictionary files should be searched
+    ///            first before looking into the standard dictionary locations.
+    ///            Pass an empty string in order to only look in standard locations.
+    pub fn list_supported_hyphenation_languages(path: &str) -> Vec<String> {
+        libvoikko::list_supported_hyphenation_languages(path)
+    }
+
+    /// Same as list_supported_spelling_languages() but for grammar checking.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to a directory from which dictionary files should be searched
+    ///            first before looking into the standard dictionary locations.
+    ///            Pass an empty string in order to only look in standard locations.
+    pub fn list_supported_grammar_checking_languages(path: &str) -> Vec<String> {
+        libvoikko::list_supported_grammar_checking_languages(path)
     }
 
     pub struct Voikko {
@@ -91,8 +129,8 @@ pub mod voikko {
 
     #[derive(Debug, PartialEq, Eq)]
     pub struct Token {
-        token_text: String,
-        token_type: TokenType,
+        pub token_text: String,
+        pub token_type: TokenType,
     }
 
     impl Token {
@@ -255,13 +293,12 @@ pub mod voikko {
             let mut offset = 0;
             while offset < text.chars().count() {
                 // sent_len is in UTF-8 characters, not bytes
+                let next_text = text
+                                .chars()
+                                .skip(offset)
+                                .collect::<String>();
                 let (raw_sent, sent_len) =
-                    libvoikko::next_sentence(self.handle, text
-                                                          .chars()
-                                                          .skip(offset)
-                                                          .collect::<String>()
-                                                          .as_str()
-                                                          );
+                    libvoikko::next_sentence(self.handle, next_text.as_str());
                 let sent_type = match raw_sent {
                     libvoikko::voikko_sentence_type::SENTENCE_NO_START => SentenceType::NoStart,
                     libvoikko::voikko_sentence_type::SENTENCE_POSSIBLE => SentenceType::Possible,

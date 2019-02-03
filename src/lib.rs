@@ -66,6 +66,29 @@ mod voikko {
         }
     }
 
+    #[derive(Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    pub enum SentenceType {
+        None,
+        NoStart,
+        Probable,
+        Possible,
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    pub struct Sentence {
+        sentence_text: String,
+        sentence_type: SentenceType,
+    }
+
+    impl Sentence {
+        pub fn new(sentence_text: &str, sentence_type: SentenceType) -> Sentence {
+            Sentence { sentence_text: String::from(sentence_text),
+                       sentence_type: sentence_type}
+        }
+    }
+
     impl Voikko {
         /// Initializes Voikko and returns a Voikko struct.
         ///
@@ -185,6 +208,33 @@ mod voikko {
                 offset += token_len;
             }
             tokenlist
+        }
+
+        /// Find sentences in a text string. Returns a vector of Sentence structs.
+        ///
+        /// # Arguments
+        ///
+        /// * `text` - Text to find sentences in.
+        pub fn sentences(&self, text: &str) -> Vec<Sentence> {
+            let mut sentlist = Vec::new();
+            let mut offset = 0;
+            while offset < text.len() {
+                let (raw_sent, sent_len) = libvoikko::next_sentence(self.handle, &text[offset..]);
+                let sent_type = match raw_sent {
+                    libvoikko::voikko_sentence_type::SENTENCE_NO_START => SentenceType::NoStart,
+                    libvoikko::voikko_sentence_type::SENTENCE_POSSIBLE => SentenceType::Possible,
+                    libvoikko::voikko_sentence_type::SENTENCE_PROBABLE => SentenceType::Probable,
+                    _ => SentenceType::None,
+                };
+                if sent_type == SentenceType::None {
+                    break;
+                }
+                let token = Sentence::new(&text[offset..offset+sent_len],
+                                          sent_type);
+                sentlist.push(token);
+                offset += sent_len;
+            }
+            sentlist
         }
     }
 

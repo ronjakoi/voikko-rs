@@ -74,4 +74,14 @@ mod tests {
         assert_eq!(tokens[2], Token::new("vietto", TokenType::Word));
         assert_eq!(tokens[3], Token::new(".", TokenType::Punctuation));
     }
+
+    #[test]
+
+    fn test_sentences() { // sentences() doesn't seem to work very reliably
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let text = "Järvenpää kuuluu Uudenmaan maakuntaan. Sen naapurikunnat ovat Mäntsälä koillisessa, \
+                    Sipoo idässä ja Tuusula etelässä, lännessä sekä pohjoisessa.";
+        let sentences = v.sentences(text);
+        assert!(sentences.len() >= 1); // basic sanity check
+    }
 }

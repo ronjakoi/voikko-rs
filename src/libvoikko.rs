@@ -37,7 +37,7 @@ pub enum voikko_token_type {
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
-enum voikko_sentence_type {
+pub enum voikko_sentence_type {
     SENTENCE_NONE,
     SENTENCE_NO_START,
     SENTENCE_PROBABLE,
@@ -77,7 +77,7 @@ extern "C" {
                            tokenlen: *mut size_t) -> voikko_token_type;
 
     fn voikkoNextSentenceStartCstr(handle: *mut VoikkoHandle, text: *const c_char, textlen: size_t,
-                                   tokenlen: *mut size_t) -> voikko_sentence_type;
+                                   textlen: *mut size_t) -> voikko_sentence_type;
 
     fn voikkoNextGrammarErrorCstr(handle: *mut VoikkoHandle, text: *const c_char, textlen: size_t,
                                   startpos: size_t, skiperrors: c_int) -> VoikkoGrammarError;
@@ -246,4 +246,18 @@ pub fn next_token(handle: *mut VoikkoHandle, text: &str) -> (voikko_token_type, 
     }
 
     (token, tokenlen)
+}
+
+pub fn next_sentence(handle: *mut VoikkoHandle, text: &str) -> (voikko_sentence_type, usize) {
+    let mut sentlen = 0;
+    let sentlen_ptr: *mut size_t = &mut sentlen;
+    let sentence;
+    unsafe {
+        let text_cstr = ffi::CString::new(text).unwrap();
+        let text_ptr = text_cstr.as_ptr();
+        sentence = voikkoNextSentenceStartCstr(handle, text_ptr, text.len(), sentlen_ptr);
+        sentlen = std::ptr::read_unaligned(sentlen_ptr) as usize;
+    }
+
+    (sentence, sentlen)
 }

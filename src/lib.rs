@@ -143,7 +143,7 @@ pub mod voikko {
         }
     }
 
-    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
     pub enum SentenceType {
         None,
         NoStart,
@@ -153,14 +153,14 @@ pub mod voikko {
 
     #[derive(Debug, PartialEq, Eq)]
     pub struct Sentence {
-        sentence_text: String,
-        sentence_type: SentenceType,
+        text: String,
+        next_start_type: SentenceType,
     }
 
     impl Sentence {
         pub fn new(sentence_text: &str, sentence_type: SentenceType) -> Sentence {
-            Sentence { sentence_text: String::from(sentence_text),
-                       sentence_type: sentence_type}
+            Sentence { text: String::from(sentence_text),
+                       next_start_type: sentence_type}
         }
     }
 
@@ -290,10 +290,10 @@ pub mod voikko {
         /// # Arguments
         ///
         /// * `text` - Text to find sentences in.
-        /* TODO: Still probably Unicode character counting issues here. Results are weird. */
         pub fn sentences(&self, text: &str) -> Vec<Sentence> {
             let mut sentlist = Vec::new();
             let mut offset = 0;
+            let mut next_start_type = SentenceType::NoStart;
             while offset < text.chars().count() {
                 // sent_len is in UTF-8 characters, not bytes
                 let next_text = text
@@ -302,26 +302,26 @@ pub mod voikko {
                                 .collect::<String>();
                 let (raw_sent, sent_len) =
                     libvoikko::next_sentence(self.handle, next_text.as_str());
-                let sent_type = match raw_sent {
+                next_start_type = match raw_sent {
                     libvoikko::voikko_sentence_type::SENTENCE_NO_START => SentenceType::NoStart,
                     libvoikko::voikko_sentence_type::SENTENCE_POSSIBLE => SentenceType::Possible,
                     libvoikko::voikko_sentence_type::SENTENCE_PROBABLE => SentenceType::Probable,
                     _ => SentenceType::None,
                 };
-                if sent_type == SentenceType::None {
-                    break;
-                }
                 // construct new Sentence object with text slice and sentence type
                 let token = Sentence::new(text
                                           .chars()
                                           .skip(offset)
-                                          .take(sent_len-1) // is -1 even right?
+                                          .take(sent_len)
                                           .collect::<String>()
                                           .as_str()
                                           ,
-                                          sent_type);
+                                          next_start_type);
                 sentlist.push(token);
-                offset += sent_len-1; // is -1 even right?
+                if next_start_type == SentenceType::None {
+                    break;
+                }
+                offset += sent_len;
             }
             sentlist
         }

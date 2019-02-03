@@ -77,12 +77,15 @@ mod tests {
 
     #[test]
 
-    fn test_sentences() { // sentences() doesn't seem to work very reliably
+    fn test_sentences() {
         let v = Voikko::new("fi-x-morphoid", None).unwrap();
         let text = "Järvenpää kuuluu Uudenmaan maakuntaan. Sen naapurikunnat ovat Mäntsälä koillisessa, \
                     Sipoo idässä ja Tuusula etelässä, lännessä sekä pohjoisessa.";
         let sentences = v.sentences(text);
-        assert!(sentences.len() >= 1); // basic sanity check
+        assert_eq!(sentences[0], Sentence::new("Järvenpää kuuluu Uudenmaan maakuntaan. ",
+                                               SentenceType::Probable));
+        assert_eq!(sentences[1], Sentence::new("Sen naapurikunnat ovat Mäntsälä koillisessa, Sipoo idässä ja Tuusula etelässä, lännessä sekä pohjoisessa.",
+                                                SentenceType::None));
     }
 
     #[test]

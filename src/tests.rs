@@ -114,4 +114,21 @@ mod tests {
                 .into_iter()
                 .any(|x| x.starts_with("fi")));
     }
+
+    #[test]
+    fn test_analyze() {
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let analyses = v.analyze("kaljakori");
+        let mut comparison = Analysis::new();
+        comparison.insert("CLASS".to_string(), "nimisana".to_string());
+        comparison.insert("FSTOUTPUT".to_string(),
+            "[Ln][Xs]504403[X][Xp]kalja[X]kalj[Sn][Ny]a[Bh][Bc][Ln][Xs]506023[X][Xp]kori[X]kor[Sn][Ny]i".to_string());
+        comparison.insert("STRUCTURE".to_string(), "=ppppp=pppp".to_string());
+        comparison.insert("WORDIDS".to_string(), "+kalja(w504403)+kori(w506023)".to_string());
+        comparison.insert("SIJAMUOTO".to_string(), "nimento".to_string());
+        comparison.insert("BASEFORM".to_string(), "kaljakori".to_string());
+        comparison.insert("WORDBASES".to_string(), "+kalja(kalja)+kori(kori)".to_string());
+        comparison.insert("NUMBER".to_string(), "singular".to_string());
+        assert_eq!(analyses[0], comparison);
+    }
 }

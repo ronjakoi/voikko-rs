@@ -183,7 +183,7 @@ pub fn suggest(handle: *mut VoikkoHandle, word: &str) -> Vec<String> {
     let ptr = unsafe {
         voikkoSuggestCstr(handle, ffi::CString::new(word).unwrap().as_ptr())
     } as *mut *mut c_char;
-    get_string_vec(ptr)
+    get_string_vec(ptr, true)
 }
 
 pub fn hyphenate(handle: *mut VoikkoHandle, word: &str) -> Result<String, bool> {
@@ -295,7 +295,7 @@ pub fn list_dicts(path: &str) -> Vec<voikko::Dictionary> {
 
 // Get vector of Strings from double pointer to c_char.
 // Also free memory reserved by the pointer.
-fn get_string_vec(ptr: *mut *mut c_char) -> Vec<String> {
+fn get_string_vec(ptr: *mut *mut c_char, free_memory: bool) -> Vec<String> {
     let mut vect = Vec::new();
     if ptr.is_null() {
         return vect;
@@ -308,7 +308,9 @@ fn get_string_vec(ptr: *mut *mut c_char) -> Vec<String> {
                                        .unwrap()));
                 i += 1;
             }
-            voikkoFreeCstrArray(ptr);
+            if free_memory {
+                voikkoFreeCstrArray(ptr);
+            }
         }
         return vect;
     }
@@ -318,19 +320,55 @@ pub fn list_supported_spelling_languages(path: &str) -> Vec<String> {
     let ptr = unsafe {
         voikkoListSupportedSpellingLanguages(ffi::CString::new(path).unwrap().as_ptr())
     } as *mut *mut c_char;
-    get_string_vec(ptr)
+    get_string_vec(ptr, true)
 }
 
 pub fn list_supported_hyphenation_languages(path: &str) -> Vec<String> {
     let ptr = unsafe {
         voikkoListSupportedHyphenationLanguages(ffi::CString::new(path).unwrap().as_ptr())
     } as *mut *mut c_char;
-    get_string_vec(ptr)
+    get_string_vec(ptr, true)
 }
 
 pub fn list_supported_grammar_checking_languages(path: &str) -> Vec<String> {
     let ptr = unsafe {
         voikkoListSupportedGrammarCheckingLanguages(ffi::CString::new(path).unwrap().as_ptr())
     } as *mut *mut c_char;
-    get_string_vec(ptr)
+    get_string_vec(ptr, true)
+}
+
+pub fn analyze_word(handle: *mut VoikkoHandle, word: &str) -> Vec<voikko::Analysis> {
+    let mut vect = Vec::new();
+    unsafe {
+        // NULL-pointer terminated list of analyses
+        let analysis_list_ptr = voikkoAnalyzeWordCstr(handle, ffi::CString::new(word).unwrap().as_ptr());
+        if analysis_list_ptr.is_null() {
+            return vect;
+        } else {
+            // loop through list until NULL pointer
+            let mut i = 0;
+            while !(*analysis_list_ptr.offset(i)).is_null() {
+                let mut analysis = voikko::Analysis::new();
+                // get all key-value pairs for this analysis
+                let keys_ptr = voikko_mor_analysis_keys(*analysis_list_ptr.offset(i));
+                let keys = get_string_vec(keys_ptr as *mut *mut c_char, false);
+                for key in keys {
+                    let value_ptr = voikko_mor_analysis_value_cstr(*analysis_list_ptr.offset(i),
+                                                                   ffi::CString::new(key.as_str()).unwrap().as_ptr());
+                    let value = ffi::CStr::from_ptr(value_ptr)
+                                .to_str()
+                                .unwrap_or_default();
+                    // insert key-value pair
+                    analysis.insert(key, String::from(value));
+                    voikko_free_mor_analysis_value_cstr(value_ptr);
+                }
+                // add this analysis to the return vector
+                vect.push(analysis);
+                i += 1;
+            }
+            voikko_free_mor_analysis(analysis_list_ptr);
+            return vect;
+        }
+    }
+}
 }

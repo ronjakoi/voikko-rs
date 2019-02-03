@@ -23,6 +23,7 @@ pub mod voikko {
 
     use crate::libvoikko;
     use unicode_segmentation::UnicodeSegmentation;
+    use std::collections::HashMap;
 
     /// Returns the version number of libvoikko.
     pub fn version<'a>() -> &'a str {
@@ -57,6 +58,8 @@ pub mod voikko {
             }
         }
     }
+
+    pub type Analysis = HashMap<String, String>;
 
     /// Get a list of available dictionaries. Returns a vector of Dictionary structs.
     ///
@@ -321,6 +324,19 @@ pub mod voikko {
                 offset += sent_len-1; // is -1 even right?
             }
             sentlist
+        }
+
+        /// Analyzes the morphology of given word.
+        ///
+        /// Returns a vector of Analysis structs (std::collections::HashMap) or an empty vector if
+        /// analysis fails.
+        ///
+        /// # Arguments
+        ///
+        /// * `word` - word to analyze
+        // https://github.com/voikko/corevoikko/blob/rel-libvoikko-4.1.1/libvoikko/doc/morphological-analysis.txt
+        pub fn analyze(&self, word: &str) -> Vec<Analysis> {
+            libvoikko::analyze_word(self.handle, word)
         }
     }
 

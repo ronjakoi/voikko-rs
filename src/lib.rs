@@ -159,6 +159,12 @@ mod voikko {
             }
         }
 
+
+        /// Tokenize a text string. Returns a vector of strings.
+        ///
+        /// # Arguments
+        ///
+        /// * `text` - Text to find tokens in.
         pub fn tokens(&self, text: &str) -> Vec<Token> {
             let mut tokenlist = Vec::new();
             let mut offset = 0;
@@ -174,8 +180,8 @@ mod voikko {
                 if token_type == TokenType::None {
                     break;
                 }
-                let token = Token { token_text: String::from(&text[offset..offset+token_len]),
-                                    token_type: token_type };
+                let token = Token::new(&text[offset..offset+token_len],
+                                       token_type);
                 tokenlist.push(token);
                 offset += token_len;
             }

@@ -21,7 +21,7 @@ mod libvoikko;
 
 mod voikko {
 
-    use super::*;
+    use crate::libvoikko;
     use unicode_segmentation::UnicodeSegmentation;
 
     /// Returns the version number of libvoikko.
@@ -34,11 +34,36 @@ mod voikko {
     }
 
     #[derive(Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
     pub enum SpellReturn {
         SpellFailed,
         SpellOk,
         InternalError,
         CharsetConversionFailed,
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    pub enum TokenType {
+        None,
+        Word,
+        Punctuation,
+        Whitespace,
+        Unknown
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    #[allow(dead_code)]
+    pub struct Token {
+        token_text: String,
+        token_type: TokenType,
+    }
+
+    impl Token {
+        pub fn new(token_text: &str, token_type: TokenType) -> Token {
+            Token { token_text: String::from(token_text),
+                    token_type: token_type }
+        }
     }
 
     impl Voikko {
@@ -132,6 +157,29 @@ mod voikko {
                       )
                 }
             }
+        }
+
+        pub fn tokens(&self, text: &str) -> Vec<Token> {
+            let mut tokenlist = Vec::new();
+            let mut offset = 0;
+            while offset < text.len() {
+                let (raw_token, token_len) = libvoikko::next_token(self.handle, &text[offset..]);
+                let token_type = match raw_token {
+                    libvoikko::voikko_token_type::TOKEN_NONE => TokenType::None,
+                    libvoikko::voikko_token_type::TOKEN_PUNCTUATION => TokenType::Punctuation,
+                    libvoikko::voikko_token_type::TOKEN_WHITESPACE => TokenType::Whitespace,
+                    libvoikko::voikko_token_type::TOKEN_WORD => TokenType::Word,
+                    _ => TokenType::Unknown,
+                };
+                if token_type == TokenType::None {
+                    break;
+                }
+                let token = Token { token_text: String::from(&text[offset..offset+token_len]),
+                                    token_type: token_type };
+                tokenlist.push(token);
+                offset += token_len;
+            }
+            tokenlist
         }
     }
 

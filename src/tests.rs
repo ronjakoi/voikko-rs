@@ -64,4 +64,14 @@ mod tests {
         assert_eq!(hyph2, Ok("rei-it-tää".to_string()));
         assert_eq!(hyph3, Ok("kuor-ma-au-to".to_string()));
     }
+
+    #[test]
+    fn test_tokens() {
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let tokens = v.tokens("juhannuksen vietto.");
+        assert_eq!(tokens[0], Token::new("juhannuksen", TokenType::Word));
+        assert_eq!(tokens[1], Token::new(" ", TokenType::Whitespace));
+        assert_eq!(tokens[2], Token::new("vietto", TokenType::Word));
+        assert_eq!(tokens[3], Token::new(".", TokenType::Punctuation));
+    }
 }

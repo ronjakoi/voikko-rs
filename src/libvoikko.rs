@@ -26,7 +26,8 @@ use std::ffi;
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
-enum voikko_token_type {
+#[derive(Debug)]
+pub enum voikko_token_type {
     TOKEN_NONE,
     TOKEN_WORD,
     TOKEN_PUNCTUATION,
@@ -45,6 +46,7 @@ enum voikko_sentence_type {
 
 #[link(name = "voikko")]
 #[allow(non_snake_case)]
+#[allow(dead_code)]
 // https://github.com/voikko/corevoikko/blob/rel-libvoikko-4.1.1/libvoikko/src/voikko.h
 extern "C" {
     fn voikkoInit(error: *const *const c_char, langcode: *const c_char,
@@ -231,3 +233,17 @@ pub fn hyphenate(handle: *mut VoikkoHandle, word: &str) -> Result<String, bool> 
         Ok(ret)
     }
 }*/
+
+pub fn next_token(handle: *mut VoikkoHandle, text: &str) -> (voikko_token_type, usize) {
+    let mut tokenlen = 0;
+    let tokenlen_ptr: *mut size_t = &mut tokenlen;
+    let token;
+    unsafe {
+        let text_cstr = ffi::CString::new(text).unwrap();
+        let text_ptr = text_cstr.as_ptr();
+        token = voikkoNextTokenCstr(handle, text_ptr, text.len(), tokenlen_ptr);
+        tokenlen = std::ptr::read_unaligned(tokenlen_ptr) as usize;
+    }
+
+    (token, tokenlen)
+}

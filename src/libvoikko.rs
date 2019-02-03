@@ -371,4 +371,19 @@ pub fn analyze_word(handle: *mut VoikkoHandle, word: &str) -> Vec<voikko::Analys
         }
     }
 }
+
+pub fn set_bool_option(handle: *mut VoikkoHandle, option: isize, value: bool) -> bool {
+    let res = unsafe { voikkoSetBooleanOption(handle, option as c_int, value as c_int) };
+    match res {
+        0 => false,
+        _ => true
+    }
+}
+
+pub fn set_int_option(handle: *mut VoikkoHandle, option: isize, value: isize) -> bool {
+    let res = unsafe { voikkoSetBooleanOption(handle, option as c_int, value as c_int) };
+    match res {
+        0 => false,
+        _ => true
+    }
 }

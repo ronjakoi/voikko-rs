@@ -335,6 +335,77 @@ pub mod voikko {
         pub fn analyze(&self, word: &str) -> Vec<Analysis> {
             libvoikko::analyze_word(self.handle, word)
         }
+
+        // Values of option constants documented in
+        // https://github.com/voikko/corevoikko/blob/rel-libvoikko-4.1.1/libvoikko/src/voikko_defines.h
+
+        // Boolean options
+
+        pub fn set_opt_ignore_dot(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 0, value)
+        }
+
+        pub fn set_opt_ignore_numbers(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 1, value)
+        }
+
+        pub fn set_opt_ignore_uppercase(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 3, value)
+        }
+
+        pub fn set_opt_accept_first_uppercase(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 6, value)
+        }
+
+        pub fn set_opt_accept_all_uppercase(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 7, value)
+        }
+
+        pub fn set_opt_no_ugly_hyphenation(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 4, value)
+        }
+
+        pub fn set_opt_ocr_suggestions(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 8, value)
+        }
+
+        pub fn set_opt_ignore_nonwords(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 10, value)
+        }
+
+        pub fn set_opt_accept_extra_hyphens(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 11, value)
+        }
+
+        pub fn set_opt_accept_missing_hyphens(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 12, value)
+        }
+
+        pub fn set_opt_accept_titles_in_gc(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 13, value)
+        }
+
+        pub fn set_opt_accept_unfinished_paragrahs_in_gc(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 14, value)
+        }
+
+        pub fn set_opt_hyphenate_unknown_words(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 15, value)
+        }
+
+        pub fn set_opt_accept_bulleted_lists_in_gc(&self, value: bool) -> bool {
+            libvoikko::set_bool_option(self.handle, 16, value)
+        }
+
+        // Integer options
+
+        pub fn set_min_hyphenated_word_length(&self, value: isize) -> bool {
+            libvoikko::set_int_option(self.handle, 9, value)
+        }
+
+        pub fn set_speller_cache_size(&self, value: isize) -> bool {
+            libvoikko::set_int_option(self.handle, 17, value)
+        }
     }
 
     impl Drop for Voikko {

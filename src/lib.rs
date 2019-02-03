@@ -19,7 +19,7 @@
 mod tests;
 mod libvoikko;
 
-mod voikko {
+pub mod voikko {
 
     use crate::libvoikko;
     use unicode_segmentation::UnicodeSegmentation;
@@ -34,7 +34,6 @@ mod voikko {
     }
 
     #[derive(Debug, PartialEq, Eq)]
-    #[allow(dead_code)]
     pub enum SpellReturn {
         SpellFailed,
         SpellOk,
@@ -43,7 +42,6 @@ mod voikko {
     }
 
     #[derive(Debug, PartialEq, Eq)]
-    #[allow(dead_code)]
     pub enum TokenType {
         None,
         Word,
@@ -53,7 +51,6 @@ mod voikko {
     }
 
     #[derive(Debug, PartialEq, Eq)]
-    #[allow(dead_code)]
     pub struct Token {
         token_text: String,
         token_type: TokenType,
@@ -67,7 +64,6 @@ mod voikko {
     }
 
     #[derive(Debug, PartialEq, Eq)]
-    #[allow(dead_code)]
     pub enum SentenceType {
         None,
         NoStart,
@@ -76,7 +72,6 @@ mod voikko {
     }
 
     #[derive(Debug, PartialEq, Eq)]
-    #[allow(dead_code)]
     pub struct Sentence {
         sentence_text: String,
         sentence_type: SentenceType,

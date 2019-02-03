@@ -31,6 +31,7 @@ pub mod voikko {
     }
 
     /// Struct containing information about an available dictionary.
+    ///
     /// Fields are `language`, `script`, `variant` and `description`.
     #[derive(Debug, PartialEq, Eq)]
     pub struct Dictionary {

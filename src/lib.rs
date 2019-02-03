@@ -215,11 +215,19 @@ mod voikko {
         /// # Arguments
         ///
         /// * `text` - Text to find sentences in.
+        /* TODO: Still probably Unicode character counting issues here. Results are weird. */
         pub fn sentences(&self, text: &str) -> Vec<Sentence> {
             let mut sentlist = Vec::new();
             let mut offset = 0;
-            while offset < text.len() {
-                let (raw_sent, sent_len) = libvoikko::next_sentence(self.handle, &text[offset..]);
+            while offset < text.chars().count() {
+                // sent_len is in UTF-8 characters, not bytes
+                let (raw_sent, sent_len) =
+                    libvoikko::next_sentence(self.handle, text
+                                                          .chars()
+                                                          .skip(offset)
+                                                          .collect::<String>()
+                                                          .as_str()
+                                                          );
                 let sent_type = match raw_sent {
                     libvoikko::voikko_sentence_type::SENTENCE_NO_START => SentenceType::NoStart,
                     libvoikko::voikko_sentence_type::SENTENCE_POSSIBLE => SentenceType::Possible,
@@ -229,10 +237,17 @@ mod voikko {
                 if sent_type == SentenceType::None {
                     break;
                 }
-                let token = Sentence::new(&text[offset..offset+sent_len],
+                // construct new Sentence object with text slice and sentence type
+                let token = Sentence::new(text
+                                          .chars()
+                                          .skip(offset)
+                                          .take(sent_len-1) // is -1 even right?
+                                          .collect::<String>()
+                                          .as_str()
+                                          ,
                                           sent_type);
                 sentlist.push(token);
-                offset += sent_len;
+                offset += sent_len-1; // is -1 even right?
             }
             sentlist
         }

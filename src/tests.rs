@@ -82,6 +82,7 @@ mod tests {
         let text = "Järvenpää kuuluu Uudenmaan maakuntaan. Sen naapurikunnat ovat Mäntsälä koillisessa, \
                     Sipoo idässä ja Tuusula etelässä, lännessä sekä pohjoisessa.";
         let sentences = v.sentences(text);
+        println!("{:?}", sentences);
         assert!(sentences.len() >= 1); // basic sanity check
     }
 }

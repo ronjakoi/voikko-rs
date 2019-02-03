@@ -248,6 +248,8 @@ pub fn next_token(handle: *mut VoikkoHandle, text: &str) -> (voikko_token_type, 
     (token, tokenlen)
 }
 
+// 'text' is a pointer to the start of our buffer, in terms of bytes.
+// however, the return value 'sentlen' is a unicode character count. tricky.
 pub fn next_sentence(handle: *mut VoikkoHandle, text: &str) -> (voikko_sentence_type, usize) {
     let mut sentlen = 0;
     let sentlen_ptr: *mut size_t = &mut sentlen;

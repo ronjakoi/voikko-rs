@@ -18,6 +18,7 @@
 
 use libc::{c_int, c_char, size_t};
 use std::ffi;
+use crate::voikko;
 
 #[repr(C)] pub struct VoikkoHandle { _private: [u8; 0] }
 #[repr(C)] pub struct VoikkoGrammarError { _private: [u8; 0] }
@@ -26,6 +27,7 @@ use std::ffi;
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum voikko_token_type {
     TOKEN_NONE,
@@ -37,6 +39,8 @@ pub enum voikko_token_type {
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
+#[allow(dead_code)]
+#[derive(Debug)]
 pub enum voikko_sentence_type {
     SENTENCE_NONE,
     SENTENCE_NO_START,
@@ -262,4 +266,44 @@ pub fn next_sentence(handle: *mut VoikkoHandle, text: &str) -> (voikko_sentence_
     }
 
     (sentence, sentlen)
+}
+
+pub fn list_dicts(path: &str) -> Vec<voikko::Dictionary> {
+    let mut vect = Vec::new();
+    let ptr = unsafe {
+        voikko_list_dicts(ffi::CString::new(path).unwrap().as_ptr())
+    };
+    if ptr.is_null() {
+        return vect;
+    } else {
+        unsafe {
+            let mut i = 0;
+            while !(*ptr.offset(i)).is_null() {
+                let lang_ptr    = voikko_dict_language(*ptr.offset(i));
+                let script_ptr  = voikko_dict_script(*ptr.offset(i));
+                let variant_ptr = voikko_dict_variant(*ptr.offset(i));
+                let desc_ptr    = voikko_dict_description(*ptr.offset(i));
+                let lang_str    = ffi::CStr::from_ptr(lang_ptr)
+                                  .to_str()
+                                  .unwrap();
+                let script_str  = ffi::CStr::from_ptr(script_ptr)
+                                  .to_str()
+                                  .unwrap();
+                let variant_str = ffi::CStr::from_ptr(variant_ptr)
+                                  .to_str()
+                                  .unwrap();
+                let desc_str    = ffi::CStr::from_ptr(desc_ptr)
+                                  .to_str()
+                                  .unwrap();
+                vect.push(voikko::Dictionary::new(
+                    lang_str,
+                    script_str,
+                    variant_str,
+                    desc_str,
+                ));
+                i += 1;
+            }
+        }
+        return vect;
+    }
 }

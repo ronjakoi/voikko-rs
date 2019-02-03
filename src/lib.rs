@@ -29,6 +29,45 @@ pub mod voikko {
         libvoikko::version()
     }
 
+    /// Struct containing information about an available dictionary.
+    /// Fields are `language`, `script`, `variant` and `description`.
+    #[derive(Debug, PartialEq, Eq)]
+    pub struct Dictionary {
+        pub language: String,
+        pub script: String,
+        pub variant: String,
+        pub description: String,
+    }
+
+    impl Dictionary {
+        /// Construct new Dictionary struct.
+        ///
+        /// # Arguments
+        ///
+        /// * `language`
+        /// * `script`
+        /// * `variant`
+        /// * `description`
+        pub fn new(language: &str, script: &str, variant: &str, description: &str) -> Dictionary {
+            Dictionary {
+                language: String::from(language),
+                script: String::from(script),
+                variant: String::from(variant),
+                description: String::from(description),
+            }
+        }
+    }
+
+    /// Get a list of available dictionaries. Returns a vector of Dictionary structs.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - path to a directory from which dictionary files should be searched
+    ///            first before looking into the standard dictionary locations.
+    pub fn list_dicts(path: &str) -> Vec<Dictionary> {
+        libvoikko::list_dicts(path)
+    }
+
     pub struct Voikko {
         handle: *mut libvoikko::VoikkoHandle,
     }

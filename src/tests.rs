@@ -85,4 +85,10 @@ mod tests {
         println!("{:?}", sentences);
         assert!(sentences.len() >= 1); // basic sanity check
     }
+
+    #[test]
+    fn test_dictionaries() {
+        let dicts = list_dicts("/etc/voikko");
+        assert_eq!(dicts[0].language, "fi");
+    }
 }

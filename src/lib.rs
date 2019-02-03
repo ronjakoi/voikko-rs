@@ -25,7 +25,7 @@ mod voikko {
     use unicode_segmentation::UnicodeSegmentation;
 
     /// Returns the version number of libvoikko.
-    pub fn version() -> String {
+    pub fn version<'a>() -> &'a str {
         libvoikko::version()
     }
 

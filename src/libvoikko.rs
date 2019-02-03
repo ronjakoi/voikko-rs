@@ -159,11 +159,11 @@ pub fn terminate(handle: *mut VoikkoHandle) {
     }
 }
 
-pub fn version() -> String {
+pub fn version<'a>() -> &'a str {
     let ver;
     unsafe {
         let version_ptr = voikkoGetVersion();
-        ver = ffi::CStr::from_ptr(version_ptr).to_str().unwrap().to_string();
+        ver = ffi::CStr::from_ptr(version_ptr).to_str().unwrap();
     }
     return ver
 }

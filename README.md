@@ -13,7 +13,6 @@ Rust bindings for the [Voikko](https://voikko.puimula.org/) library.
 ## Status
 
 The crate is feature-complete but not yet tested very well. Bugs may remain.
-It is also not yet up on [crates.io](https://crates.io/).
 
 So far only tested on Ubuntu 18.04 x86_64 with `libvoikko`
 version 4.1.1.

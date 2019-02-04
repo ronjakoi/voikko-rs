@@ -3,9 +3,9 @@ name = "voikko-rs"
 version = "1.0.0"
 authors = ["Ronja Koistinen <ronja.koistinen@kapsi.fi>"]
 edition = "2018"
-publish = false
 license = "GPL-3.0-or-later"
 repository = "https://github.com/ronjakoi/voikko-rs"
+description = "Rust bindings for the Voikko library"
 
 [dependencies]
 libc = "0.2"

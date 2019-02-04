@@ -228,7 +228,7 @@ pub mod voikko {
         /// # Errors
         ///
         /// Returns an error string on error.
-        pub fn hyphenate(&self, word: &str) -> Result<String, bool> {
+        pub fn hyphens(&self, word: &str) -> Result<String, bool> {
             libvoikko::hyphenate(self.handle, word)
         }
 
@@ -239,8 +239,8 @@ pub mod voikko {
         ///
         /// * `word` - word to hyphenate
         /// * `hyphen` - string to insert at hyphenation points
-        pub fn insert_hyphens(&self, word: &str, hyphen: &str) -> Result<String, bool> {
-            let hyphens = self.hyphenate(word);
+        pub fn hyphenate(&self, word: &str, hyphen: &str) -> Result<String, bool> {
+            let hyphens = self.hyphens(word);
             match hyphens {
                 Err(_) => Err(false),
                 Ok(hyph) => {

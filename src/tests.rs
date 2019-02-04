@@ -50,16 +50,16 @@ mod tests {
     #[test]
     fn test_hyphenate() {
         let v = Voikko::new("fi-x-morphoid", None).unwrap();
-        let hyph = v.hyphenate("suihkumoottorimekaanikko");
+        let hyph = v.hyphens("suihkumoottorimekaanikko");
         assert_eq!(hyph, Ok("    - -   - - - -  -  - ".to_string()));
     }
 
     #[test]
     fn test_insert_hyphens() {
         let v = Voikko::new("fi-x-morphoid", None).unwrap();
-        let hyph = v.insert_hyphens("suihkumoottorimekaanikko", "-");
-        let hyph2 = v.insert_hyphens("rei'ittää", "-");
-        let hyph3 = v.insert_hyphens("kuorma-auto", "-");
+        let hyph = v.hyphenate("suihkumoottorimekaanikko", "-");
+        let hyph2 = v.hyphenate("rei'ittää", "-");
+        let hyph3 = v.hyphenate("kuorma-auto", "-");
         assert_eq!(hyph, Ok("suih-ku-moot-to-ri-me-kaa-nik-ko".to_string()));
         assert_eq!(hyph2, Ok("rei-it-tää".to_string()));
         assert_eq!(hyph3, Ok("kuor-ma-au-to".to_string()));

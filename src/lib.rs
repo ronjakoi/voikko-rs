@@ -16,14 +16,14 @@
 
 */
 
-mod tests;
 mod libvoikko;
+mod tests;
 
 pub mod voikko {
 
     use crate::libvoikko;
-    use unicode_segmentation::UnicodeSegmentation;
     use std::collections::HashMap;
+    use unicode_segmentation::UnicodeSegmentation;
 
     /// Returns the version number of libvoikko.
     pub fn version<'a>() -> &'a str {
@@ -129,7 +129,7 @@ pub mod voikko {
         Word,
         Punctuation,
         Whitespace,
-        Unknown
+        Unknown,
     }
 
     #[derive(Debug, PartialEq, Eq)]
@@ -140,8 +140,10 @@ pub mod voikko {
 
     impl Token {
         pub fn new(token_text: &str, token_type: TokenType) -> Token {
-            Token { token_text: String::from(token_text),
-                    token_type: token_type }
+            Token {
+                token_text: String::from(token_text),
+                token_type: token_type,
+            }
         }
     }
 
@@ -161,8 +163,10 @@ pub mod voikko {
 
     impl Sentence {
         pub fn new(sentence_text: &str, sentence_type: SentenceType) -> Sentence {
-            Sentence { text: String::from(sentence_text),
-                       next_start_type: sentence_type}
+            Sentence {
+                text: String::from(sentence_text),
+                next_start_type: sentence_type,
+            }
         }
     }
 
@@ -259,18 +263,16 @@ pub mod voikko {
             let hyphens = self.hyphens(word);
             match hyphens {
                 Err(_) => Err(false),
-                Ok(hyph) => {
-                    Ok(word.graphemes(true)
-                       .zip(hyph.graphemes(true))
-                       .map(|(w, h)| match h {
-                           " " => String::from(w),
-                           "-" => format!("{}{}", hyphen, w),
-                           "=" => String::from(hyphen),
-                           _   => String::from(w),
-                       })
-                       .collect::<String>()
-                      )
-                }
+                Ok(hyph) => Ok(word
+                    .graphemes(true)
+                    .zip(hyph.graphemes(true))
+                    .map(|(w, h)| match h {
+                        " " => String::from(w),
+                        "-" => format!("{}{}", hyphen, w),
+                        "=" => String::from(hyphen),
+                        _ => String::from(w),
+                    })
+                    .collect::<String>()),
             }
         }
 
@@ -294,8 +296,7 @@ pub mod voikko {
                 if token_type == TokenType::None {
                     break;
                 }
-                let token = Token::new(&text[offset..offset+token_len],
-                                       token_type);
+                let token = Token::new(&text[offset..offset + token_len], token_type);
                 tokenlist.push(token);
                 offset += token_len;
             }
@@ -313,10 +314,7 @@ pub mod voikko {
             let mut next_start_type = SentenceType::NoStart;
             while offset < text.chars().count() && next_start_type != SentenceType::None {
                 // sent_len is in UTF-8 characters, not bytes
-                let next_text = text
-                                .chars()
-                                .skip(offset)
-                                .collect::<String>();
+                let next_text = text.chars().skip(offset).collect::<String>();
                 let (raw_sent, sent_len) =
                     libvoikko::next_sentence(self.handle, next_text.as_str());
                 next_start_type = match raw_sent {
@@ -326,14 +324,14 @@ pub mod voikko {
                     _ => SentenceType::None,
                 };
                 // construct new Sentence object with text slice and sentence type
-                let token = Sentence::new(text
-                                          .chars()
-                                          .skip(offset)
-                                          .take(sent_len)
-                                          .collect::<String>()
-                                          .as_str()
-                                          ,
-                                          next_start_type);
+                let token = Sentence::new(
+                    text.chars()
+                        .skip(offset)
+                        .take(sent_len)
+                        .collect::<String>()
+                        .as_str(),
+                    next_start_type,
+                );
                 sentlist.push(token);
                 offset += sent_len;
             }

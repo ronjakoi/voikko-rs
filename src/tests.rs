@@ -82,8 +82,13 @@ mod tests {
         let text = "Järvenpää kuuluu Uudenmaan maakuntaan. Sen naapurikunnat ovat Mäntsälä koillisessa, \
                     Sipoo idässä ja Tuusula etelässä, lännessä sekä pohjoisessa.";
         let sentences = v.sentences(text);
-        assert_eq!(sentences[0], Sentence::new("Järvenpää kuuluu Uudenmaan maakuntaan. ",
-                                               SentenceType::Probable));
+        assert_eq!(
+            sentences[0],
+            Sentence::new(
+                "Järvenpää kuuluu Uudenmaan maakuntaan. ",
+                SentenceType::Probable
+            )
+        );
         assert_eq!(sentences[1], Sentence::new("Sen naapurikunnat ovat Mäntsälä koillisessa, Sipoo idässä ja Tuusula etelässä, lännessä sekä pohjoisessa.",
                                                 SentenceType::None));
     }
@@ -97,25 +102,19 @@ mod tests {
     #[test]
     fn test_spelling_languages() {
         let langs = list_supported_spelling_languages("");
-        assert!(langs
-                .into_iter()
-                .any(|x| x.starts_with("fi")));
+        assert!(langs.into_iter().any(|x| x.starts_with("fi")));
     }
 
     #[test]
     fn test_hyphenation_languages() {
         let langs = list_supported_hyphenation_languages("");
-        assert!(langs
-                .into_iter()
-                .any(|x| x.starts_with("fi")));
+        assert!(langs.into_iter().any(|x| x.starts_with("fi")));
     }
 
     #[test]
     fn test_gc_languages() {
         let langs = list_supported_grammar_checking_languages("");
-        assert!(langs
-                .into_iter()
-                .any(|x| x.starts_with("fi")));
+        assert!(langs.into_iter().any(|x| x.starts_with("fi")));
     }
 
     #[test]
@@ -127,10 +126,16 @@ mod tests {
         comparison.insert("FSTOUTPUT".to_string(),
             "[Ln][Xs]504403[X][Xp]kalja[X]kalj[Sn][Ny]a[Bh][Bc][Ln][Xs]506023[X][Xp]kori[X]kor[Sn][Ny]i".to_string());
         comparison.insert("STRUCTURE".to_string(), "=ppppp=pppp".to_string());
-        comparison.insert("WORDIDS".to_string(), "+kalja(w504403)+kori(w506023)".to_string());
+        comparison.insert(
+            "WORDIDS".to_string(),
+            "+kalja(w504403)+kori(w506023)".to_string(),
+        );
         comparison.insert("SIJAMUOTO".to_string(), "nimento".to_string());
         comparison.insert("BASEFORM".to_string(), "kaljakori".to_string());
-        comparison.insert("WORDBASES".to_string(), "+kalja(kalja)+kori(kori)".to_string());
+        comparison.insert(
+            "WORDBASES".to_string(),
+            "+kalja(kalja)+kori(kori)".to_string(),
+        );
         comparison.insert("NUMBER".to_string(), "singular".to_string());
         assert_eq!(analyses[0], comparison);
     }
@@ -138,7 +143,10 @@ mod tests {
     #[test]
     fn test_gc() {
         let v = Voikko::new("fi-x-morphoid", None).unwrap();
-        let errors = v.grammar_errors("Johanneksen leipäpuu pitää pitää leivottu juureen", "en");
+        let errors = v.grammar_errors(
+            "Johanneksen leipäpuu pitää pitää leivottu juureen",
+            "en",
+        );
         assert_eq!(
             errors[0],
             GrammarError {

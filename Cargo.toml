@@ -1,11 +1,31 @@
 [package]
 name = "voikko-rs"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["Ronja Koistinen <ronja.koistinen@kapsi.fi>"]
 edition = "2018"
 license = "GPL-3.0-or-later"
+homepage = "https://github.com/ronjakoi/voikko-rs"
 repository = "https://github.com/ronjakoi/voikko-rs"
 description = "Rust bindings for the Voikko library"
+readme = "README.md"
+categories = [
+    "api-bindings",
+    "internationalization",
+    "localization",
+    "text-processing"
+]
+keywords = [
+    "voikko",
+    "finnish",
+    "spell-checking",
+    "grammar checking",
+    "hyphenation",
+    "morphology",
+    "language"
+]
+
+[badges]
+travis-ci = { repository = "ronjakoi/voikko-rs" }
 
 [dependencies]
 libc = "0.2"

@@ -307,6 +307,7 @@ pub fn list_dicts(path: &str) -> Vec<voikko::Dictionary> {
                 ));
                 i += 1;
             }
+            voikko_free_dicts(ptr);
         }
         return vect;
     }

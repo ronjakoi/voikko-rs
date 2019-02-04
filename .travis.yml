@@ -13,6 +13,7 @@ addons:
     packages:
       - libvoikko-dev
       - unzip
+      - voikko-fi
 before_install:
   - wget https://www.puimula.org/htp/testing/voikko-snapshot-v5/dict-morphoid.zip
   - sudo mkdir /etc/voikko

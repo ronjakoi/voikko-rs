@@ -1,5 +1,7 @@
 # voikko-rs
 
+[![](http://meritbadge.herokuapp.com/voikko-rs)](https://crates.io/crates/voikko-rs)
+
 Rust bindings for the [Voikko](https://voikko.puimula.org/) library.
 
 ## Requirements

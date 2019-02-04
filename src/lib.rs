@@ -19,10 +19,34 @@
 mod libvoikko;
 mod tests;
 
+/// This module provides Rust bindings for libvoikko.
+///
+/// Libvoikko provides spell checking, hyphenation, grammar checking and
+/// morphological analysis for the Finnish language.
+///
+/// voikko-rs requires libvoikko (version 4.1.1 or greater)
+/// to be installed on your system.
+///
+/// # Example
+///
+/// ```
+/// extern crate voikko_rs; // in Rust 2015
+/// use voikko_rs::voikko;
+///
+/// fn main() {
+///     let v = voikko::Voikko::new("fi-x-standard", None).unwrap();
+///     println!("{}", v.hyphenate("kunnallispolitiikka", "-").unwrap());
+/// }
+/// ```
+///
+/// The above prints:
+///
+/// `kun-nal-lis-po-li-tiik-ka`
 pub mod voikko {
 
     use crate::libvoikko;
     use std::collections::HashMap;
+    use std::error;
     use unicode_segmentation::UnicodeSegmentation;
 
     /// Returns the version number of libvoikko.
@@ -30,9 +54,10 @@ pub mod voikko {
         libvoikko::version()
     }
 
-    /// Struct containing information about an available dictionary.
+    /// Information about an available dictionary
     ///
-    /// Fields are `language`, `script`, `variant` and `description`.
+    /// Contains the language, script, variant and human readable description
+    /// of the dictionary.
     #[derive(Debug, PartialEq, Eq)]
     pub struct Dictionary {
         pub language: String,
@@ -60,6 +85,7 @@ pub mod voikko {
         }
     }
 
+    /// A morphological analysis item
     pub type Analysis = HashMap<String, String>;
 
     /// Get a list of available dictionaries. Returns a vector of Dictionary structs.
@@ -115,9 +141,12 @@ pub mod voikko {
         handle: *mut libvoikko::VoikkoHandle,
     }
 
+    /// A spell check return value
     #[derive(Debug, PartialEq, Eq)]
     pub enum SpellReturn {
+        /// Incorrect spelling
         SpellFailed,
+        /// Correct spelling
         SpellOk,
         InternalError,
         CharsetConversionFailed,
@@ -132,9 +161,12 @@ pub mod voikko {
         Unknown,
     }
 
+    /// Tokenization unit
     #[derive(Debug, PartialEq, Eq)]
     pub struct Token {
+        /// Text of the token
         pub token_text: String,
+        /// Type of the token
         pub token_type: TokenType,
     }
 
@@ -147,17 +179,24 @@ pub mod voikko {
         }
     }
 
+    /// Type of a following sentence
     #[derive(Debug, PartialEq, Eq, Clone, Copy)]
     pub enum SentenceType {
+        /// There is no next sentence
         None,
         NoStart,
+        /// There is probably a sentence following this one
         Probable,
+        /// There is possibly a sentence following this one
         Possible,
     }
 
+    /// A sentence
     #[derive(Debug, PartialEq, Eq)]
     pub struct Sentence {
+        /// Text of the sentence
         text: String,
+        /// The type of the next sentence
         next_start_type: SentenceType,
     }
 
@@ -185,8 +224,33 @@ pub mod voikko {
         pub description: String,
     }
 
+    #[derive(Debug)]
+    pub struct InitError {
+        message: String,
+    }
+
+    impl InitError {
+        pub fn new(message: &str) -> InitError {
+            InitError {
+                message: String::from(message),
+            }
+        }
+    }
+
+    impl std::fmt::Display for InitError {
+        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            write!(f, "{}", self.message)
+        }
+    }
+
+    impl error::Error for InitError {
+        fn description(&self) -> &str {
+            self.message.as_str()
+        }
+    }
+
     impl Voikko {
-        /// Initializes Voikko and returns a Voikko struct.
+        /// Initializes Voikko and returns a Result<Voikko, InitError>
         ///
         /// # Arguments
         ///
@@ -198,8 +262,8 @@ pub mod voikko {
         ///
         /// # Errors
         ///
-        /// Returns an error string if init fails.
-        pub fn new(language: &str, path: Option<&str>) -> Result<Voikko, String> {
+        /// Returns an InitError result if init fails.
+        pub fn new(language: &str, path: Option<&str>) -> Result<Voikko, InitError> {
             let v = libvoikko::init(language, path);
 
             match v {
@@ -247,9 +311,9 @@ pub mod voikko {
         ///
         /// # Errors
         ///
-        /// Returns an error string on error.
+        /// Returns an error result on error.
         pub fn hyphens(&self, word: &str) -> Result<String, bool> {
-            libvoikko::hyphenate(self.handle, word)
+            libvoikko::hyphens(self.handle, word)
         }
 
         /// Hyphenates the given word in UTF-8 encoding.
@@ -259,6 +323,10 @@ pub mod voikko {
         ///
         /// * `word` - word to hyphenate
         /// * `hyphen` - string to insert at hyphenation points
+        ///
+        /// # Errors
+        ///
+        /// Returns an error result on error.
         pub fn hyphenate(&self, word: &str, hyphen: &str) -> Result<String, bool> {
             let hyphens = self.hyphens(word);
             match hyphens {

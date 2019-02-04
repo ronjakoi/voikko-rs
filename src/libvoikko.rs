@@ -165,7 +165,7 @@ extern "C" {
     fn voikko_free_mor_analysis_value_cstr(analysis_value: *mut c_char);
 }
 
-pub fn init(language: &str, path: Option<&str>) -> Result<*mut VoikkoHandle, String> {
+pub fn init(language: &str, path: Option<&str>) -> Result<*mut VoikkoHandle, voikko::InitError> {
     let path_ptr = match path {
         Some(x) => ffi::CString::new(x).expect("CString::new failed").as_ptr(),
         None => std::ptr::null() as *const c_char,
@@ -179,13 +179,8 @@ pub fn init(language: &str, path: Option<&str>) -> Result<*mut VoikkoHandle, Str
     }
 
     if handle_ptr.is_null() {
-        let error = unsafe {
-            ffi::CStr::from_ptr(*error_ptr)
-                .to_str()
-                .unwrap_or_default()
-                .to_string()
-        };
-        Err(error)
+        let error = unsafe { ffi::CStr::from_ptr(*error_ptr).to_str().unwrap_or_default() };
+        Err(voikko::InitError::new(error))
     } else {
         Ok(handle_ptr)
     }
@@ -215,7 +210,7 @@ pub fn suggest(handle: *mut VoikkoHandle, word: &str) -> Vec<String> {
     get_string_vec(ptr, true)
 }
 
-pub fn hyphenate(handle: *mut VoikkoHandle, word: &str) -> Result<String, bool> {
+pub fn hyphens(handle: *mut VoikkoHandle, word: &str) -> Result<String, bool> {
     let ptr = unsafe { voikkoHyphenateCstr(handle, ffi::CString::new(word).unwrap().as_ptr()) };
     if ptr.is_null() {
         Err(false)

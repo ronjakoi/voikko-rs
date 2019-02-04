@@ -10,11 +10,13 @@ Rust bindings for the [Voikko](https://voikko.puimula.org/) library.
 
 ## Status
 
-This crate is still under development and not yet feature-complete.
+The crate is feature-complete but not yet tested very well. Bugs may remain.
 It is also not yet up on [crates.io](https://crates.io/).
 
-So far only tested on Ubuntu 18.04 on x86_64 with `libvoikko`
+So far only tested on Ubuntu 18.04 x86_64 with `libvoikko`
 version 4.1.1.
+
+The version number is 1.0 as I do not expect major changes to the API.
 
 ### Things implemented
 
@@ -26,8 +28,8 @@ version 4.1.1.
 * Tokenization
 * Sentence delineation from input text
 * Morphological analysis
+* Grammar-checking
 
 ### Things missing
 
-* Grammar-checking
-* Tests and documentation for the option setter functions
+* Tests for the option setter functions

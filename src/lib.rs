@@ -165,6 +165,21 @@ pub mod voikko {
         }
     }
 
+    #[derive(Debug, PartialEq, Eq)]
+    /// Grammar error
+    pub struct GrammarError {
+        /// Error code
+        pub code: i32,
+        /// Start position of the error in characters
+        pub start_pos: usize,
+        /// Length of the error in characters
+        pub length: usize,
+        /// A list of suggestions for correcting the grammar error
+        pub suggestions: Vec<String>,
+        /// A localized short description of the grammar error
+        pub description: String,
+    }
+
     impl Voikko {
         /// Initializes Voikko and returns a Voikko struct.
         ///
@@ -335,6 +350,19 @@ pub mod voikko {
         // https://github.com/voikko/corevoikko/blob/rel-libvoikko-4.1.1/libvoikko/doc/morphological-analysis.txt
         pub fn analyze(&self, word: &str) -> Vec<Analysis> {
             libvoikko::analyze_word(self.handle, word)
+        }
+
+        /// Find all grammar errors in given text.
+        ///
+        /// Returns a vector of GrammarError structs or an empty vector if no errors found.
+        ///
+        /// # Arguments
+        ///
+        /// * `text` - Text to find grammar errors in. The text should usually begin at the start of
+        ///            a paragraph or sentence.
+        /// * `desc_lang` - ISO language code for the language in which to recieve error descriptions.
+        pub fn grammar_errors(&self, text: &str, desc_lang: &str) -> Vec<GrammarError> {
+            libvoikko::get_grammar_errors(self.handle, text, desc_lang)
         }
 
         // Values of option constants documented in

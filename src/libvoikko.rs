@@ -84,7 +84,7 @@ extern "C" {
                                    textlen: *mut size_t) -> voikko_sentence_type;
 
     fn voikkoNextGrammarErrorCstr(handle: *mut VoikkoHandle, text: *const c_char, textlen: size_t,
-                                  startpos: size_t, skiperrors: c_int) -> VoikkoGrammarError;
+                                  startpos: size_t, skiperrors: c_int) -> *mut VoikkoGrammarError;
 
     fn voikkoGetGrammarErrorCode(error: *const VoikkoGrammarError) -> c_int;
 
@@ -370,6 +370,57 @@ pub fn analyze_word(handle: *mut VoikkoHandle, word: &str) -> Vec<voikko::Analys
             return vect;
         }
     }
+}
+
+pub fn get_grammar_errors(handle: *mut VoikkoHandle, text: &str, desc_lang: &str) -> Vec<voikko::GrammarError> {
+    let mut vect: Vec<voikko::GrammarError> = Vec::new();
+    unsafe {
+        let mut offset = 0;
+        loop {
+            let input_text_cstr = ffi::CString::new(text).unwrap();
+            let input_text_ptr = input_text_cstr.as_ptr() as *const c_char;
+            // get pointer to a grammar error C struct. it will be a null pointer if no (more) grammar errors found.
+            // this is not documented in libvoikko.h but I checked the C++ function implementation.
+            //
+            // arguments are:
+            // * pointer to VoikkoHandle
+            // * pointer to the beginning of the input text buffer
+            // * length of the buffer in bytes
+            // * offset in characters: which position to start searching from
+            // * how many errors to skip from beginning
+            let grammar_error_ptr = voikkoNextGrammarErrorCstr(handle, input_text_ptr, text.len(), offset, 0);
+            if grammar_error_ptr.is_null() {
+                voikkoFreeGrammarError(grammar_error_ptr);
+                break;
+            }
+
+            // start asking things about the error struct
+            let error_code = voikkoGetGrammarErrorCode(grammar_error_ptr);
+            let start_pos = voikkoGetGrammarErrorStartPos(grammar_error_ptr);
+            let error_length = voikkoGetGrammarErrorLength(grammar_error_ptr);
+            let suggestions_ptr = voikkoGetGrammarErrorSuggestions(grammar_error_ptr);
+            let suggestions = get_string_vec(suggestions_ptr as *mut *mut c_char, false);
+            let desc_ptr = voikkoGetGrammarErrorShortDescription(grammar_error_ptr,
+                                                                 ffi::CString::new(desc_lang).unwrap().as_ptr());
+            let desc_str = ffi::CStr::from_ptr(desc_ptr).to_str().unwrap();
+            // push a new Rust-side GrammarError struct into the vector
+            vect.push(voikko::GrammarError {
+                code: error_code,
+                start_pos: start_pos,
+                length: error_length,
+                suggestions: suggestions,
+                description: desc_str.to_string(),
+            });
+
+            // free some memory
+            voikkoFreeErrorMessageCstr(desc_ptr);
+            voikkoFreeGrammarError(grammar_error_ptr);
+
+            // increment offset for next loop
+            offset += start_pos + error_length;
+        }
+    }
+    vect
 }
 
 pub fn set_bool_option(handle: *mut VoikkoHandle, option: isize, value: bool) -> bool {

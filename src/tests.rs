@@ -134,4 +134,30 @@ mod tests {
         comparison.insert("NUMBER".to_string(), "singular".to_string());
         assert_eq!(analyses[0], comparison);
     }
+
+    #[test]
+    fn test_gc() {
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let errors = v.grammar_errors("Johanneksen leipäpuu pitää pitää leivottu juureen", "en");
+        assert_eq!(
+            errors[0],
+            GrammarError {
+                code: 8,
+                start_pos: 21,
+                length: 11,
+                suggestions: vec!["pitää".to_string()],
+                description: "Remove duplicate word.".to_string()
+            }
+        );
+        assert_eq!(
+            errors[1],
+            GrammarError {
+                code: 9,
+                start_pos: 42,
+                length: 7,
+                suggestions: vec![],
+                description: "Terminating punctuation is missing.".to_string()
+            }
+        );
+    }
 }

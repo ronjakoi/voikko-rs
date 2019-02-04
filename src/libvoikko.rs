@@ -198,12 +198,10 @@ pub fn terminate(handle: *mut VoikkoHandle) {
 }
 
 pub fn version<'a>() -> &'a str {
-    let ver;
     unsafe {
         let version_ptr = voikkoGetVersion();
-        ver = ffi::CStr::from_ptr(version_ptr).to_str().unwrap();
+        ffi::CStr::from_ptr(version_ptr).to_str().unwrap()
     }
-    return ver;
 }
 
 pub fn spell(handle: *mut VoikkoHandle, word: &str) -> isize {

@@ -110,6 +110,7 @@ pub mod voikko {
         libvoikko::list_supported_grammar_checking_languages(path)
     }
 
+    /// A Voikko instance
     pub struct Voikko {
         handle: *mut libvoikko::VoikkoHandle,
     }

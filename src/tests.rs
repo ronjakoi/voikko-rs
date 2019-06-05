@@ -76,6 +76,16 @@ mod tests {
     }
 
     #[test]
+    fn test_tokens_mb() {
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let tokens = v.tokens("Säätiedotus viikonlopuksi.");
+        assert_eq!(tokens[0], Token::new("Säätiedotus", TokenType::Word));
+        assert_eq!(tokens[1], Token::new(" ", TokenType::Whitespace));
+        assert_eq!(tokens[2], Token::new("viikonlopuksi", TokenType::Word));
+        assert_eq!(tokens[3], Token::new(".", TokenType::Punctuation));
+    }
+
+    #[test]
 
     fn test_sentences() {
         let v = Voikko::new("fi-x-morphoid", None).unwrap();

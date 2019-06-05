@@ -364,9 +364,10 @@ pub mod voikko {
                 if token_type == TokenType::None {
                     break;
                 }
-                let token = Token::new(&text[offset..offset + token_len], token_type);
+                let token_text: String = text[offset..].chars().take(token_len).collect();
+                let token = Token::new(&token_text, token_type);
                 tokenlist.push(token);
-                offset += token_len;
+                offset += token_text.as_bytes().len();
             }
             tokenlist
         }

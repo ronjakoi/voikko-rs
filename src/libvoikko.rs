@@ -65,7 +65,7 @@ pub enum voikko_sentence_type {
 // https://github.com/voikko/corevoikko/blob/rel-libvoikko-4.1.1/libvoikko/src/voikko.h
 extern "C" {
     fn voikkoInit(
-        error: *const *const c_char,
+        error: *mut *const c_char,
         langcode: *const c_char,
         path: *const c_char,
     ) -> *mut VoikkoHandle;
@@ -167,13 +167,16 @@ extern "C" {
 
 pub fn init(language: &str, path: Option<&str>) -> Result<*mut VoikkoHandle, voikko::InitError> {
     let path_ptr = match path {
-        Some(x) => ffi::CString::new(x).expect("CString::new failed").as_ptr(),
+        Some(x) => {
+            let tmp_cstring = ffi::CString::new(x)?;
+            tmp_cstring.as_ptr()
+        },
         None => std::ptr::null() as *const c_char,
     };
     let handle_ptr;
-    let error_ptr = ffi::CString::new("").unwrap().as_ptr() as *const *const c_char;
+    let error_ptr: *mut *const c_char = &mut std::ptr::null();
     unsafe {
-        let lang = ffi::CString::new(language).unwrap();
+        let lang = ffi::CString::new(language)?;
         let lang_ptr = lang.as_ptr() as *const c_char;
         handle_ptr = voikkoInit(error_ptr, lang_ptr, path_ptr);
     }
@@ -199,28 +202,36 @@ pub fn version<'a>() -> &'a str {
     }
 }
 
-pub fn spell(handle: *mut VoikkoHandle, word: &str) -> isize {
-    let res = unsafe { voikkoSpellCstr(handle, ffi::CString::new(word).unwrap().as_ptr()) };
-    res as isize
+pub fn spell(handle: *mut VoikkoHandle, word: &str) -> Result<isize, ffi::NulError> {
+    let word_cstring = ffi::CString::new(word)?;
+    let res = unsafe { voikkoSpellCstr(handle, word_cstring.as_ptr()) };
+    Ok(res as isize)
 }
 
-pub fn suggest(handle: *mut VoikkoHandle, word: &str) -> Vec<String> {
-    let ptr = unsafe { voikkoSuggestCstr(handle, ffi::CString::new(word).unwrap().as_ptr()) }
+pub fn suggest(handle: *mut VoikkoHandle, word: &str) -> Result<Vec<String>, ffi::NulError> {
+    let word_cstring = ffi::CString::new(word)?;
+    let ptr = unsafe { voikkoSuggestCstr(handle, word_cstring.as_ptr()) }
         as *mut *mut c_char;
-    get_string_vec(ptr, true)
+    Ok(get_string_vec(ptr, true))
 }
 
 pub fn hyphens(handle: *mut VoikkoHandle, word: &str) -> Result<String, bool> {
-    let ptr = unsafe { voikkoHyphenateCstr(handle, ffi::CString::new(word).unwrap().as_ptr()) };
-    if ptr.is_null() {
-        Err(false)
-    } else {
-        let cstr = unsafe { ffi::CStr::from_ptr(ptr).to_str().unwrap() };
-        let ret = cstr.to_string();
-        unsafe {
-            voikkoFreeCstr(ptr);
+    let word_cstring = ffi::CString::new(word);
+    match word_cstring {
+        Err(_) => Err(false),
+        Ok(wcst) => {
+            let ptr = unsafe { voikkoHyphenateCstr(handle, wcst.as_ptr()) };
+            if ptr.is_null() {
+                Err(false)
+            } else {
+                let cstr = unsafe { ffi::CStr::from_ptr(ptr).to_str().unwrap() };
+                let ret = cstr.to_string();
+                unsafe {
+                    voikkoFreeCstr(ptr);
+                }
+                Ok(ret)
+            }
         }
-        Ok(ret)
     }
 }
 
@@ -275,11 +286,12 @@ pub fn next_sentence(handle: *mut VoikkoHandle, text: &str) -> (voikko_sentence_
     (sentence, sentlen)
 }
 
-pub fn list_dicts(path: &str) -> Vec<voikko::Dictionary> {
+pub fn list_dicts(path: &str) -> Result<Vec<voikko::Dictionary>, ffi::NulError> {
     let mut vect = Vec::new();
-    let ptr = unsafe { voikko_list_dicts(ffi::CString::new(path).unwrap().as_ptr()) };
+    let path_cstring = ffi::CString::new(path)?;
+    let ptr = unsafe { voikko_list_dicts(path_cstring.as_ptr()) };
     if ptr.is_null() {
-        return vect;
+        Ok(vect)
     } else {
         unsafe {
             let mut i = 0;
@@ -302,7 +314,7 @@ pub fn list_dicts(path: &str) -> Vec<voikko::Dictionary> {
             }
             voikko_free_dicts(ptr);
         }
-        return vect;
+        Ok(vect)
     }
 }
 
@@ -311,7 +323,7 @@ pub fn list_dicts(path: &str) -> Vec<voikko::Dictionary> {
 fn get_string_vec(ptr: *mut *mut c_char, free_memory: bool) -> Vec<String> {
     let mut vect = Vec::new();
     if ptr.is_null() {
-        return vect;
+        vect
     } else {
         unsafe {
             let mut i = 0;
@@ -325,39 +337,43 @@ fn get_string_vec(ptr: *mut *mut c_char, free_memory: bool) -> Vec<String> {
                 voikkoFreeCstrArray(ptr);
             }
         }
-        return vect;
+        vect
     }
 }
 
-pub fn list_supported_spelling_languages(path: &str) -> Vec<String> {
+pub fn list_supported_spelling_languages(path: &str) -> Result<Vec<String>, ffi::NulError> {
+    let path_cstring = ffi::CString::new(path)?;
     let ptr =
-        unsafe { voikkoListSupportedSpellingLanguages(ffi::CString::new(path).unwrap().as_ptr()) }
+        unsafe { voikkoListSupportedSpellingLanguages(path_cstring.as_ptr()) }
             as *mut *mut c_char;
-    get_string_vec(ptr, true)
+    Ok(get_string_vec(ptr, true))
 }
 
-pub fn list_supported_hyphenation_languages(path: &str) -> Vec<String> {
+pub fn list_supported_hyphenation_languages(path: &str) -> Result<Vec<String>, ffi::NulError> {
+    let path_cstring = ffi::CString::new(path)?;
     let ptr = unsafe {
-        voikkoListSupportedHyphenationLanguages(ffi::CString::new(path).unwrap().as_ptr())
+        voikkoListSupportedHyphenationLanguages(path_cstring.as_ptr())
     } as *mut *mut c_char;
-    get_string_vec(ptr, true)
+    Ok(get_string_vec(ptr, true))
 }
 
-pub fn list_supported_grammar_checking_languages(path: &str) -> Vec<String> {
+pub fn list_supported_grammar_checking_languages(path: &str) -> Result<Vec<String>, ffi::NulError> {
+    let path_cstring = ffi::CString::new(path)?;
     let ptr = unsafe {
-        voikkoListSupportedGrammarCheckingLanguages(ffi::CString::new(path).unwrap().as_ptr())
+        voikkoListSupportedGrammarCheckingLanguages(path_cstring.as_ptr())
     } as *mut *mut c_char;
-    get_string_vec(ptr, true)
+    Ok(get_string_vec(ptr, true))
 }
 
-pub fn analyze_word(handle: *mut VoikkoHandle, word: &str) -> Vec<voikko::Analysis> {
+pub fn analyze_word(handle: *mut VoikkoHandle, word: &str) -> Result<Vec<voikko::Analysis>, ffi::NulError> {
     let mut vect = Vec::new();
+    let word_cstring = ffi::CString::new(word)?;
     unsafe {
         // NULL-pointer terminated list of analyses
         let analysis_list_ptr =
-            voikkoAnalyzeWordCstr(handle, ffi::CString::new(word).unwrap().as_ptr());
+            voikkoAnalyzeWordCstr(handle, word_cstring.as_ptr());
         if analysis_list_ptr.is_null() {
-            return vect;
+            Ok(vect)
         } else {
             // loop through list until NULL pointer
             let mut i = 0;
@@ -367,9 +383,10 @@ pub fn analyze_word(handle: *mut VoikkoHandle, word: &str) -> Vec<voikko::Analys
                 let keys_ptr = voikko_mor_analysis_keys(*analysis_list_ptr.offset(i));
                 let keys = get_string_vec(keys_ptr as *mut *mut c_char, false);
                 for key in keys {
+                    let key_cstring = ffi::CString::new(key.as_str())?;
                     let value_ptr = voikko_mor_analysis_value_cstr(
                         *analysis_list_ptr.offset(i),
-                        ffi::CString::new(key.as_str()).unwrap().as_ptr(),
+                        key_cstring.as_ptr(),
                     );
                     let value = ffi::CStr::from_ptr(value_ptr).to_str().unwrap_or_default();
                     // insert key-value pair
@@ -381,7 +398,7 @@ pub fn analyze_word(handle: *mut VoikkoHandle, word: &str) -> Vec<voikko::Analys
                 i += 1;
             }
             voikko_free_mor_analysis(analysis_list_ptr);
-            return vect;
+            Ok(vect)
         }
     }
 }
@@ -390,7 +407,7 @@ pub fn get_grammar_errors(
     handle: *mut VoikkoHandle,
     text: &str,
     desc_lang: &str,
-) -> Vec<voikko::GrammarError> {
+) -> Result<Vec<voikko::GrammarError>, ffi::NulError> {
     let mut vect: Vec<voikko::GrammarError> = Vec::new();
     unsafe {
         let mut offset = 0;
@@ -419,17 +436,18 @@ pub fn get_grammar_errors(
             let error_length = voikkoGetGrammarErrorLength(grammar_error_ptr);
             let suggestions_ptr = voikkoGetGrammarErrorSuggestions(grammar_error_ptr);
             let suggestions = get_string_vec(suggestions_ptr as *mut *mut c_char, false);
+            let desc_cstring = ffi::CString::new(desc_lang)?;
             let desc_ptr = voikkoGetGrammarErrorShortDescription(
                 grammar_error_ptr,
-                ffi::CString::new(desc_lang).unwrap().as_ptr(),
+                desc_cstring.as_ptr(),
             );
             let desc_str = ffi::CStr::from_ptr(desc_ptr).to_str().unwrap();
             // push a new Rust-side GrammarError struct into the vector
             vect.push(voikko::GrammarError {
                 code: error_code,
-                start_pos: start_pos,
+                start_pos,
                 length: error_length,
-                suggestions: suggestions,
+                suggestions,
                 description: desc_str.to_string(),
             });
 
@@ -441,7 +459,7 @@ pub fn get_grammar_errors(
             offset += start_pos + error_length;
         }
     }
-    vect
+    Ok(vect)
 }
 
 pub fn set_bool_option(handle: *mut VoikkoHandle, option: isize, value: bool) -> bool {

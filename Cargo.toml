@@ -1,6 +1,6 @@
 [package]
 name = "voikko-rs"
-version = "1.0.4"
+version = "1.0.5"
 authors = ["Ronja Koistinen <ronja.koistinen@kapsi.fi>"]
 edition = "2018"
 license = "GPL-3.0-or-later"
@@ -26,5 +26,5 @@ keywords = [
 travis-ci = { repository = "ronjakoi/voikko-rs" }
 
 [dependencies]
-libc = "0.2"
-unicode-segmentation = "1.2"
+libc = "^0.2"
+unicode-segmentation = "^1.6"

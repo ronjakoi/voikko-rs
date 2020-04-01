@@ -34,7 +34,7 @@ mod tests;
 /// use voikko_rs::voikko;
 ///
 /// fn main() {
-///     let v = voikko::Voikko::new("fi-x-standard", None).unwrap();
+///     let v = voikko::Voikko::new("fi-x-morphoid", None).unwrap();
 ///     println!("{}", v.hyphenate("kunnallispolitiikka", "-").unwrap());
 /// }
 /// ```
@@ -96,7 +96,7 @@ pub mod voikko {
     ///            first before looking into the standard dictionary locations.
     ///            Pass an empty string in order to only look in standard locations.
     pub fn list_dicts(path: &str) -> Vec<Dictionary> {
-        libvoikko::list_dicts(path)
+        libvoikko::list_dicts(path).unwrap_or_else(|_| vec![])
     }
 
     /// Return a list of language codes representing the languages for which at least one
@@ -111,7 +111,7 @@ pub mod voikko {
     ///            first before looking into the standard dictionary locations.
     ///            Pass an empty string in order to only look in standard locations.
     pub fn list_supported_spelling_languages(path: &str) -> Vec<String> {
-        libvoikko::list_supported_spelling_languages(path)
+        libvoikko::list_supported_spelling_languages(path).unwrap_or_else(|_| vec![])
     }
 
     /// Same as list_supported_spelling_languages() but for hyphenation.
@@ -122,7 +122,7 @@ pub mod voikko {
     ///            first before looking into the standard dictionary locations.
     ///            Pass an empty string in order to only look in standard locations.
     pub fn list_supported_hyphenation_languages(path: &str) -> Vec<String> {
-        libvoikko::list_supported_hyphenation_languages(path)
+        libvoikko::list_supported_hyphenation_languages(path).unwrap_or_else(|_| vec![])
     }
 
     /// Same as list_supported_spelling_languages() but for grammar checking.
@@ -133,7 +133,7 @@ pub mod voikko {
     ///            first before looking into the standard dictionary locations.
     ///            Pass an empty string in order to only look in standard locations.
     pub fn list_supported_grammar_checking_languages(path: &str) -> Vec<String> {
-        libvoikko::list_supported_grammar_checking_languages(path)
+        libvoikko::list_supported_grammar_checking_languages(path).unwrap_or_else(|_| vec![])
     }
 
     /// A Voikko instance
@@ -174,7 +174,7 @@ pub mod voikko {
         pub fn new(token_text: &str, token_type: TokenType) -> Token {
             Token {
                 token_text: String::from(token_text),
-                token_type: token_type,
+                token_type,
             }
         }
     }
@@ -249,6 +249,14 @@ pub mod voikko {
         }
     }
 
+    impl std::convert::From<std::ffi::NulError> for InitError {
+        fn from(error: std::ffi::NulError) -> Self {
+            InitError {
+                message: format!("{}", error)
+            }
+        }
+    }
+
     impl Voikko {
         /// Initializes Voikko and returns a Result<Voikko, InitError>
         ///
@@ -267,7 +275,7 @@ pub mod voikko {
             let v = libvoikko::init(language, path);
 
             match v {
-                Ok(handle) => Ok(Voikko { handle: handle }),
+                Ok(handle) => Ok(Voikko { handle }),
                 Err(error) => Err(error),
             }
         }
@@ -280,11 +288,15 @@ pub mod voikko {
         pub fn spell(&self, word: &str) -> SpellReturn {
             let ret = libvoikko::spell(self.handle, word);
             match ret {
-                0 => SpellReturn::SpellFailed,
-                1 => SpellReturn::SpellOk,
-                3 => SpellReturn::CharsetConversionFailed,
-                _ => SpellReturn::InternalError,
+                Ok(code) => match code {
+                    0 => SpellReturn::SpellFailed,
+                    1 => SpellReturn::SpellOk,
+                    3 => SpellReturn::CharsetConversionFailed,
+                    _ => SpellReturn::InternalError,
+                },
+                Err(_) => SpellReturn::SpellFailed,
             }
+
         }
 
         /// Finds suggested correct spellings for given UTF-8 encoded word.
@@ -294,7 +306,7 @@ pub mod voikko {
         ///
         /// * `word` - word to find suggestions for
         pub fn suggest(&self, word: &str) -> Vec<String> {
-            libvoikko::suggest(self.handle, word)
+            libvoikko::suggest(self.handle, word).unwrap_or_else(|_| vec![])
         }
 
         /// Hyphenates the given word in UTF-8 encoding.
@@ -417,7 +429,7 @@ pub mod voikko {
         /// * `word` - word to analyze
         // https://github.com/voikko/corevoikko/blob/rel-libvoikko-4.1.1/libvoikko/doc/morphological-analysis.txt
         pub fn analyze(&self, word: &str) -> Vec<Analysis> {
-            libvoikko::analyze_word(self.handle, word)
+            libvoikko::analyze_word(self.handle, word).unwrap_or_else(|_| vec![])
         }
 
         /// Find all grammar errors in given text.
@@ -430,7 +442,7 @@ pub mod voikko {
         ///            a paragraph or sentence.
         /// * `desc_lang` - ISO language code for the language in which to recieve error descriptions.
         pub fn grammar_errors(&self, text: &str, desc_lang: &str) -> Vec<GrammarError> {
-            libvoikko::get_grammar_errors(self.handle, text, desc_lang)
+            libvoikko::get_grammar_errors(self.handle, text, desc_lang).unwrap_or_else(|_| vec![])
         }
 
         // Values of option constants documented in

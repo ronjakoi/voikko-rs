@@ -15,33 +15,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+#![warn(missing_docs)]
 
+//! This module provides Rust bindings for libvoikko.
+//!
+//! Libvoikko provides spell checking, hyphenation, grammar checking and
+//! morphological analysis for the Finnish language.
+//!
+//! voikko-rs requires libvoikko (version 4.1.1 or greater)
+//! to be installed on your system.
+//!
 mod libvoikko;
 mod tests;
 
-/// This module provides Rust bindings for libvoikko.
-///
-/// Libvoikko provides spell checking, hyphenation, grammar checking and
-/// morphological analysis for the Finnish language.
-///
-/// voikko-rs requires libvoikko (version 4.1.1 or greater)
-/// to be installed on your system.
-///
-/// # Example
-///
-/// ```
-/// extern crate voikko_rs; // in Rust 2015
-/// use voikko_rs::voikko;
-///
-/// fn main() {
-///     let v = voikko::Voikko::new("fi-x-morphoid", None).unwrap();
-///     println!("{}", v.hyphenate("kunnallispolitiikka", "-").unwrap());
-/// }
-/// ```
-///
-/// The above prints:
-///
-/// `kun-nal-lis-po-li-tiik-ka`
+/// This module contains the functions, types and structs of the crate.
 pub mod voikko {
 
     use crate::libvoikko;
@@ -58,6 +45,7 @@ pub mod voikko {
     ///
     /// Contains the language, script, variant and human readable description
     /// of the dictionary.
+    #[allow(missing_docs)]
     #[derive(Debug, PartialEq, Eq)]
     pub struct Dictionary {
         pub language: String,
@@ -137,6 +125,19 @@ pub mod voikko {
     }
 
     /// A Voikko instance
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// extern crate voikko_rs; // in Rust 2015
+    /// use voikko_rs::voikko;
+    ///
+    /// fn main() {
+    ///     let v = voikko::Voikko::new("fi-x-morphoid", None).unwrap();
+    ///     assert_eq!(v.hyphenate("kunnallispolitiikka", "-"),
+    ///                Ok(String::from("kun-nal-lis-po-li-tiik-ka")));
+    /// }
+    /// ```
     pub struct Voikko {
         handle: *mut libvoikko::VoikkoHandle,
     }
@@ -148,11 +149,15 @@ pub mod voikko {
         SpellFailed,
         /// Correct spelling
         SpellOk,
+        /// Internal error from libvoikko
         InternalError,
+        /// libvoikko failed to convert character sets
         CharsetConversionFailed,
     }
 
+    /// Type of token returned by [`analyze()`]
     #[derive(Debug, PartialEq, Eq)]
+    #[allow(missing_docs)]
     pub enum TokenType {
         None,
         Word,
@@ -170,6 +175,7 @@ pub mod voikko {
         pub token_type: TokenType,
     }
 
+    #[allow(missing_docs)]
     impl Token {
         pub fn new(token_text: &str, token_type: TokenType) -> Token {
             Token {
@@ -182,12 +188,13 @@ pub mod voikko {
     /// Type of a following sentence
     #[derive(Debug, PartialEq, Eq, Clone, Copy)]
     pub enum SentenceType {
-        /// There is no next sentence
+        /// End of text reached or error.
         None,
+        /// This is not a start of a new sentence.
         NoStart,
-        /// There is probably a sentence following this one
+        /// This may be a start of a new sentence.
         Probable,
-        /// There is possibly a sentence following this one
+        /// This is a probable start of a new sentence.
         Possible,
     }
 
@@ -200,6 +207,7 @@ pub mod voikko {
         next_start_type: SentenceType,
     }
 
+    #[allow(missing_docs)]
     impl Sentence {
         pub fn new(sentence_text: &str, sentence_type: SentenceType) -> Sentence {
             Sentence {
@@ -225,10 +233,12 @@ pub mod voikko {
     }
 
     #[derive(Debug)]
+    /// Error in initializing libvoikko
     pub struct InitError {
         message: String,
     }
 
+    #[allow(missing_docs)]
     impl InitError {
         pub fn new(message: &str) -> InitError {
             InitError {
@@ -258,10 +268,12 @@ pub mod voikko {
     }
 
     #[derive(Debug, PartialEq, Eq)]
+    /// Error hyphenating a string
     pub struct HyphenateError {
         message: String,
     }
 
+    #[allow(missing_docs)]
     impl HyphenateError {
         pub fn new(message: &str) -> Self {
             HyphenateError {
@@ -370,7 +382,7 @@ pub mod voikko {
         }
 
         /// Hyphenates the given word in UTF-8 encoding.
-        /// Returns a string where hyphens are inserted in all hyphenation points.
+        /// Returns a string where caller-supplied characters are inserted in all hyphenation points.
         ///
         /// # Arguments
         ///

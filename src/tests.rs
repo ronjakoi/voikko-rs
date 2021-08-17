@@ -66,6 +66,19 @@ mod tests {
     }
 
     #[test]
+    fn test_hyphenate_new() {
+        let v = Voikko::new("fi-x-morphoid", None).unwrap();
+        let hyph = v.hyphenate_new("suihkumoottorimekaanikko", "-", true);
+        let hyph2 = v.hyphenate_new("rei'ittää", "-", true);
+        let hyph3 = v.hyphenate_new("kuorma-auto", "-", true);
+        let hyph4 = v.hyphenate_new("rei'ittää", "-", false);
+        assert_eq!(hyph, Ok("suih-ku-moot-to-ri-me-kaa-nik-ko".to_string()));
+        assert_eq!(hyph2, Ok("rei-it-tää".to_string()));
+        assert_eq!(hyph3, Ok("kuor-ma-au-to".to_string()));
+        assert_eq!(hyph4, Ok("rei'it-tää".to_string()));
+    }
+
+    #[test]
     fn test_tokens() {
         let v = Voikko::new("fi-x-morphoid", None).unwrap();
         let tokens = v.tokens("juhannuksen vietto.");

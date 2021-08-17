@@ -257,6 +257,47 @@ pub mod voikko {
         }
     }
 
+    #[derive(Debug, PartialEq, Eq)]
+    pub struct HyphenateError {
+        message: String,
+    }
+
+    impl HyphenateError {
+        pub fn new(message: &str) -> Self {
+            HyphenateError {
+                message: String::from(message),
+            }
+        }
+    }
+
+    impl std::fmt::Display for HyphenateError {
+        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            write!(f, "{}", self.message)
+        }
+    }
+
+    impl error::Error for HyphenateError {
+        fn description(&self) -> &str {
+            self.message.as_str()
+        }
+    }
+
+    impl std::convert::From<std::ffi::NulError> for HyphenateError {
+        fn from(error: std::ffi::NulError) -> Self {
+            HyphenateError {
+                message: format!("{}", error)
+            }
+        }
+    }
+
+    impl std::convert::From<std::str::Utf8Error> for HyphenateError {
+        fn from(error: std::str::Utf8Error) -> Self {
+            HyphenateError {
+                message: format!("{}", error)
+            }
+        }
+    }
+
     impl Voikko {
         /// Initializes Voikko and returns a Result<Voikko, InitError>
         ///
@@ -354,6 +395,32 @@ pub mod voikko {
                     })
                     .collect::<String>()),
             }
+        }
+
+        /// Hyphenates the given word in UTF-8 encoding.
+        /// Returns a string where caller-supplied characters are inserted in all hyphenation points.
+        /// **Requires libvoikko version 4.2.0 or greater.**
+        ///
+        /// # Arguments
+        ///
+        /// * `word` - word to hyphenate
+        /// * `character` - string to insert at hyphenation points
+        /// * `allow_context_changes` - boolean parameter controlling whether to insert hyphens even if they alter the word
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// # use voikko_rs::voikko;
+        /// # let v = voikko::Voikko::new("fi-x-morphoid", None).unwrap();
+        /// // Voikko initialized on the variable v
+        /// let hyphenated1 = v.hyphenate_new("rei'ittää", "-", true);
+        /// assert_eq!(hyphenated1, Ok(String::from("rei-it-tää")));
+        /// let hyphenated2 = v.hyphenate_new("rei'ittää", "-", false);
+        /// assert_eq!(hyphenated2, Ok(String::from("rei'it-tää")));
+        ///
+        /// ```
+        pub fn hyphenate_new(&self, word: &str, character: &str, allow_context_changes: bool) -> Result<String, HyphenateError> {
+            libvoikko::insert_hyphens(self.handle, word, character, allow_context_changes)
         }
 
         /// Tokenize a text string. Returns a vector of Token structs.

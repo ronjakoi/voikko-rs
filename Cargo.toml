@@ -27,4 +27,4 @@ travis-ci = { repository = "ronjakoi/voikko-rs" }
 
 [dependencies]
 libc = "^0.2"
-unicode-segmentation = "^1.7"
+unicode-segmentation = "^1.8"

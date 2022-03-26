@@ -2,6 +2,7 @@
 
 [![](http://meritbadge.herokuapp.com/voikko-rs)](https://crates.io/crates/voikko-rs)
 [![](https://img.shields.io/badge/docs-docs.rs-green.svg)](https://docs.rs/voikko-rs/)
+[![Coverage Status](https://coveralls.io/repos/github/ronjakoi/voikko-rs/badge.svg?branch=master)](https://coveralls.io/github/ronjakoi/voikko-rs?branch=master)
 
 Rust bindings for the [Voikko](https://voikko.puimula.org/) library.
 

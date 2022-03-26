@@ -16,6 +16,9 @@
 
 */
 #![warn(missing_docs)]
+#![warn(clippy::pedantic)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::similar_names)]
 
 //! This module provides Rust bindings for libvoikko.
 //!
@@ -63,6 +66,7 @@ pub mod voikko {
         /// * `script`
         /// * `variant`
         /// * `description`
+        #[must_use]
         pub fn new(language: &str, script: &str, variant: &str, description: &str) -> Dictionary {
             Dictionary {
                 language: String::from(language),
@@ -102,7 +106,7 @@ pub mod voikko {
         libvoikko::list_supported_spelling_languages(path).unwrap_or_else(|_| vec![])
     }
 
-    /// Same as list_supported_spelling_languages() but for hyphenation.
+    /// Same as `list_supported_spelling_languages()` but for hyphenation.
     ///
     /// # Arguments
     ///
@@ -113,7 +117,7 @@ pub mod voikko {
         libvoikko::list_supported_hyphenation_languages(path).unwrap_or_else(|_| vec![])
     }
 
-    /// Same as list_supported_spelling_languages() but for grammar checking.
+    /// Same as `list_supported_spelling_languages()` but for grammar checking.
     ///
     /// # Arguments
     ///
@@ -311,7 +315,7 @@ pub mod voikko {
     }
 
     impl Voikko {
-        /// Initializes Voikko and returns a Result<Voikko, InitError>
+        /// Initializes Voikko and returns a `Result<Voikko, InitError>`
         ///
         /// # Arguments
         ///
@@ -323,7 +327,7 @@ pub mod voikko {
         ///
         /// # Errors
         ///
-        /// Returns an InitError result if init fails.
+        /// Returns an `InitError` result if init fails.
         pub fn new(language: &str, path: Option<&str>) -> Result<Voikko, InitError> {
             let v = libvoikko::init(language, path);
 
@@ -338,6 +342,7 @@ pub mod voikko {
         /// # Arguments
         ///
         /// * `word` - word to check
+        #[must_use]
         pub fn spell(&self, word: &str) -> SpellReturn {
             let ret = libvoikko::spell(self.handle, word);
             match ret {
@@ -358,6 +363,7 @@ pub mod voikko {
         /// # Arguments
         ///
         /// * `word` - word to find suggestions for
+        #[must_use]
         pub fn suggest(&self, word: &str) -> Vec<String> {
             libvoikko::suggest(self.handle, word).unwrap_or_else(|_| vec![])
         }
@@ -431,6 +437,10 @@ pub mod voikko {
         /// assert_eq!(hyphenated2, Ok(String::from("rei'it-tää")));
         ///
         /// ```
+        ///
+        /// # Errors
+        ///
+        /// Is Err if libvoikko returns a null pointer, i.e. it fails to hyphenate.
         pub fn hyphenate_new(&self, word: &str, character: &str, allow_context_changes: bool) -> Result<String, HyphenateError> {
             libvoikko::insert_hyphens(self.handle, word, character, allow_context_changes)
         }
@@ -440,6 +450,8 @@ pub mod voikko {
         /// # Arguments
         ///
         /// * `text` - Text to find tokens in.
+        #[allow(clippy::match_wildcard_for_single_variants)]
+        #[must_use]
         pub fn tokens(&self, text: &str) -> Vec<Token> {
             let mut tokenlist = Vec::new();
             let mut offset = 0;
@@ -468,6 +480,8 @@ pub mod voikko {
         /// # Arguments
         ///
         /// * `text` - Text to find sentences in.
+        #[allow(clippy::match_wildcard_for_single_variants)]
+        #[must_use]
         pub fn sentences(&self, text: &str) -> Vec<Sentence> {
             let mut sentlist = Vec::new();
             let mut offset = 0;
@@ -500,26 +514,28 @@ pub mod voikko {
 
         /// Analyzes the morphology of given word.
         ///
-        /// Returns a vector of Analysis structs (std::collections::HashMap) or an empty vector if
+        /// Returns a vector of Analysis structs (`std::collections::HashMap`) or an empty vector if
         /// analysis fails.
         ///
         /// # Arguments
         ///
         /// * `word` - word to analyze
         // https://github.com/voikko/corevoikko/blob/rel-libvoikko-4.1.1/libvoikko/doc/morphological-analysis.txt
+        #[must_use]
         pub fn analyze(&self, word: &str) -> Vec<Analysis> {
             libvoikko::analyze_word(self.handle, word).unwrap_or_else(|_| vec![])
         }
 
         /// Find all grammar errors in given text.
         ///
-        /// Returns a vector of GrammarError structs or an empty vector if no errors found.
+        /// Returns a vector of `GrammarError` structs or an empty vector if no errors found.
         ///
         /// # Arguments
         ///
         /// * `text` - Text to find grammar errors in. The text should usually begin at the start of
         ///            a paragraph or sentence.
         /// * `desc_lang` - ISO language code for the language in which to recieve error descriptions.
+        #[must_use]
         pub fn grammar_errors(&self, text: &str, desc_lang: &str) -> Vec<GrammarError> {
             libvoikko::get_grammar_errors(self.handle, text, desc_lang).unwrap_or_else(|_| vec![])
         }

@@ -1,6 +1,7 @@
 # voikko-rs
 
-[![](http://meritbadge.herokuapp.com/voikko-rs)](https://crates.io/crates/voikko-rs) [![](https://img.shields.io/badge/docs-docs.rs-green.svg)](https://docs.rs/voikko-rs/) [![Build Status](https://travis-ci.org/ronjakoi/voikko-rs.svg?branch=master)](https://travis-ci.org/ronjakoi/voikko-rs)
+[![](http://meritbadge.herokuapp.com/voikko-rs)](https://crates.io/crates/voikko-rs)
+[![](https://img.shields.io/badge/docs-docs.rs-green.svg)](https://docs.rs/voikko-rs/)
 
 Rust bindings for the [Voikko](https://voikko.puimula.org/) library.
 

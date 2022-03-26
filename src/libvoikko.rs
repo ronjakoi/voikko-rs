@@ -166,18 +166,18 @@ extern "C" {
 }
 
 pub fn init(language: &str, path: Option<&str>) -> Result<*mut VoikkoHandle, voikko::InitError> {
-    let path_ptr = match path {
+    let path_ptr: *const c_char = match path {
         Some(x) => {
             let tmp_cstring = ffi::CString::new(x)?;
             tmp_cstring.as_ptr()
         },
-        None => std::ptr::null() as *const c_char,
+        None => std::ptr::null::<c_char>(),
     };
     let handle_ptr;
     let error_ptr: *mut *const c_char = &mut std::ptr::null();
     unsafe {
         let lang = ffi::CString::new(language)?;
-        let lang_ptr = lang.as_ptr() as *const c_char;
+        let lang_ptr: *const c_char = lang.as_ptr().cast::<c_char>();
         handle_ptr = voikkoInit(error_ptr, lang_ptr, path_ptr);
     }
 
@@ -210,8 +210,7 @@ pub fn spell(handle: *mut VoikkoHandle, word: &str) -> Result<isize, ffi::NulErr
 
 pub fn suggest(handle: *mut VoikkoHandle, word: &str) -> Result<Vec<String>, ffi::NulError> {
     let word_cstring = ffi::CString::new(word)?;
-    let ptr = unsafe { voikkoSuggestCstr(handle, word_cstring.as_ptr()) }
-        as *mut *mut c_char;
+    let ptr: *mut *mut c_char = unsafe { voikkoSuggestCstr(handle, word_cstring.as_ptr()) };
     Ok(get_string_vec(ptr, true))
 }
 
@@ -242,7 +241,7 @@ pub fn insert_hyphens(handle: *mut VoikkoHandle, word: &str, hyphen: &str, allow
         voikkoInsertHyphensCstr(handle,
                                 word_cstring.as_ptr(),
                                 hyphen_cstring.as_ptr(),
-                                allow_context_changes as c_int)
+                                c_int::from(allow_context_changes))
     };
     if ptr.is_null() {
         Err(voikko::HyphenateError::new("Error hyphenating string: null pointer from libvoikko"))
@@ -413,7 +412,7 @@ pub fn get_grammar_errors(
         let mut offset = 0;
         loop {
             let input_text_cstr = ffi::CString::new(text).unwrap();
-            let input_text_ptr = input_text_cstr.as_ptr() as *const c_char;
+            let input_text_ptr: *const c_char = input_text_cstr.as_ptr().cast::<c_char>();
             // get pointer to a grammar error C struct. it will be a null pointer if no (more) grammar errors found.
             // this is not documented in libvoikko.h but I checked the C++ function implementation.
             //

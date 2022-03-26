@@ -406,7 +406,7 @@ pub mod voikko {
                     .graphemes(true)
                     .zip(hyph.graphemes(true))
                     .map(|(w, h)| match h {
-                        " " => String::from(w),
+                        // " " => String::from(w),
                         "-" => format!("{}{}", hyphen, w),
                         "=" => String::from(hyphen),
                         _ => String::from(w),

@@ -17,6 +17,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install libvoikko dev package
+      run: sudo apt-get install -y libvoikko-dev unzip voikko-fi
+    - name: Install fi-x-morphoid dictionary
+      run: |
+        wget https://www.puimula.org/htp/testing/voikko-snapshot-v5/dict-morphoid.zip &&
+        sudo mkdir /etc/voikko &&
+        sudo unzip -d /etc/voikko dict-morphoid.zip
     - name: Build
       run: cargo build
     - name: Run tests

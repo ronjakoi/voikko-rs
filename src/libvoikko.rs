@@ -464,8 +464,8 @@ pub fn get_grammar_errors(
 }
 
 #[allow(clippy::match_like_matches_macro)]
-pub fn set_bool_option(handle: *mut VoikkoHandle, option: isize, value: bool) -> bool {
-    let res = unsafe { voikkoSetBooleanOption(handle, option as c_int, value as c_int) };
+pub fn set_bool_option(handle: *mut VoikkoHandle, option: i32, value: bool) -> bool {
+    let res = unsafe { voikkoSetBooleanOption(handle, option, value.into()) };
     match res {
         0 => false,
         _ => true,
@@ -473,8 +473,8 @@ pub fn set_bool_option(handle: *mut VoikkoHandle, option: isize, value: bool) ->
 }
 
 #[allow(clippy::match_like_matches_macro)]
-pub fn set_int_option(handle: *mut VoikkoHandle, option: isize, value: isize) -> bool {
-    let res = unsafe { voikkoSetIntegerOption(handle, option as c_int, value as c_int) };
+pub fn set_int_option(handle: *mut VoikkoHandle, option: i32, value: i32) -> bool {
+    let res = unsafe { voikkoSetIntegerOption(handle, option, value) };
     match res {
         0 => false,
         _ => true,

@@ -669,7 +669,7 @@ pub mod voikko {
         /// individual parts of compound words.
         ///
         /// Default: 2
-        pub fn set_min_hyphenated_word_length(&self, value: isize) -> bool {
+        pub fn set_min_hyphenated_word_length(&self, value: i32) -> bool {
             libvoikko::set_int_option(self.handle, 9, value)
         }
 
@@ -677,7 +677,7 @@ pub mod voikko {
         /// >= 0 ( size in bytes = `2^cache_size * (6544*sizeof(wchar_t) + 1008)` ).
         ///
         /// Default: 0
-        pub fn set_speller_cache_size(&self, value: isize) -> bool {
+        pub fn set_speller_cache_size(&self, value: i32) -> bool {
             libvoikko::set_int_option(self.handle, 17, value)
         }
     }

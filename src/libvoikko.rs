@@ -299,10 +299,12 @@ pub fn list_dicts(path: &str) -> Result<Vec<voikko::Dictionary>, ffi::NulError> 
                 let script_ptr = voikko_dict_script(*ptr.offset(i));
                 let variant_ptr = voikko_dict_variant(*ptr.offset(i));
                 let desc_ptr = voikko_dict_description(*ptr.offset(i));
+
                 let lang_str = ffi::CStr::from_ptr(lang_ptr).to_str().unwrap();
                 let script_str = ffi::CStr::from_ptr(script_ptr).to_str().unwrap();
                 let variant_str = ffi::CStr::from_ptr(variant_ptr).to_str().unwrap();
                 let desc_str = ffi::CStr::from_ptr(desc_ptr).to_str().unwrap();
+
                 vect.push(voikko::Dictionary::new(
                     lang_str,
                     script_str,
@@ -461,6 +463,7 @@ pub fn get_grammar_errors(
     Ok(vect)
 }
 
+#[allow(clippy::match_like_matches_macro)]
 pub fn set_bool_option(handle: *mut VoikkoHandle, option: isize, value: bool) -> bool {
     let res = unsafe { voikkoSetBooleanOption(handle, option as c_int, value as c_int) };
     match res {
@@ -469,6 +472,7 @@ pub fn set_bool_option(handle: *mut VoikkoHandle, option: isize, value: bool) ->
     }
 }
 
+#[allow(clippy::match_like_matches_macro)]
 pub fn set_int_option(handle: *mut VoikkoHandle, option: isize, value: isize) -> bool {
     let res = unsafe { voikkoSetIntegerOption(handle, option as c_int, value as c_int) };
     match res {
